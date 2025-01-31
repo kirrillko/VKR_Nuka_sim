@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Симулятор ЯЭУ | Современный путь</title>
+    <style>
+        /* Стили для вкладок и содержимого */
+        .tab {
+            display: inline-block;
+            padding: 5px 10px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background-color: #fff;
+            border-bottom: none;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        /* Стили для рабочей области */
+        .work-area {
+            width: 100%;
+            height: 450px;
+            background-color: #28a745; /* зелёный цвет */
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        /* Ползунок */
+        .slider-container {
+            text-align: center;
+            line-height: 10vh;
+        }
+
+        .slider {
+            transform: rotate(-90deg); 
+            width: 75px;
+        }
+
+        /* Модальное окно */
+        .modal {
+          display: none; /* Скрыто по умолчанию */
+          position: fixed;
+          z-index: 1000;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон */
+          justify-content: center;
+          align-items: center;
+          animation: fadeIn 0.3s ease-in-out;
+        }
+
+        /* Контейнер для контента */
+        .modal-content {
+          background-color: white;
+          padding: 20px;
+          border-radius: 8px;
+          text-align: center;
+          min-width: 200px;
+          max-width: 400px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Стиль текста */
+        #alertMessage {
+          font-size: 16px;
+          margin-bottom: 20px;
+          color: #333;
+        }
+
+        /* Стиль кнопки */
+        #closeAlert {
+          padding: 10px 20px;
+          background-color: #007bff;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          font-size: 14px;
+        }
+
+        #closeAlert:hover {
+          background-color: #0056b3;
+        }
+
+        /* Анимация появления */
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+
+        /* Контейнер для контента */
+        .error-content {
+          background-color: red;
+          padding: 20px;
+          border-radius: 8px;
+          text-align: center;
+          min-width: 200px;
+          max-width: 400px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Стиль текста */
+        #errorMessage {
+          font-size: 16px;
+          margin-bottom: 20px;
+          color: white;
+        }
+
+        /* Стиль кнопки */
+        #closeErrorAlert {
+          padding: 10px 20px;
+          background-color: green;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          font-size: 14px;
+        }
+
+        #closeErrorAlert:hover {
+          background-color: #0056b3;
+        }
+
+        /* Анимация появления */
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Алерты -->
+<div id="customAlert" class="modal">
+  <div class="modal-content">
+    <p id="alertMessage"></p>
+    <button id="closeAlert">Понятно</button>
+  </div>
+</div>
+
+<div id="errorAlert" class="modal">
+  <div class="error-content">
+    <p id="errorMessage"></p>
+    <button id="closeErrorAlert">Принято</button>
+  </div>
+</div>
+
+<!-- Рабочая область -->
+<div class="work-area" id='three-container'>
+    <!-- Рабочая область с графикой-->
+</div>
+
+
+<!-- Вкладки -->
+<div class="tabs">
+    <div class="tab active" data-tab="tab1">твэл</div>
+    <div class="tab" data-tab="tab2">ТВС</div>
+    <div class="tab" data-tab="tab3">Реактор</div>
+    <div class="tab" data-tab="tab4">Парогенератор</div>
+    <div class="tab" data-tab="tab5">Другая теплотехника</div>
+    <div class="tab" data-tab="tab6">Системы безопасности</div>
+    <div class="tab" data-tab="tab7">Радиационная безопасность</div>
+    <div class="tab" data-tab="tab8">Эксплуатация</div>
+</div>
+
+<!-- Содержимое вкладок -->
+
+<div id="tab1" class="tab-content active">
+    <fieldset>
+      <legend>Форма твэла</legend>
+      <div style="display: flex;">
+          <div>
+            <div>
+                <img src="static\interface\tvel_cyl.png" style="height: 100px;">
+            </div>
+            <input type="radio" id="cyl" name="tvel-form" value="cyl" checked />
+            <label for="cyl">Цилиндрический</label>
+          </div>
+          <div>
+            <div>
+                <img src="static\interface\tvel_krest.png" style="height: 100px;">
+            </div>   
+            <input type="radio" id="cross" name="tvel-form" value="cross" />
+            <label for="cross">Крестообразный</label>
+          </div>
+      </div>
+    </fieldset>
+    <fieldset>
+        <legend>Обогащение</legend>
+        <br>
+        <div style="display: flex;">
+            <div class='slider-container'>
+                <input type="range" min="0.7" max="50" class="slider" id="slider" />
+            </div>
+            <div>
+                50% <br> <br> 0,7% <br> (природное) 
+            </div>
+        </div>   
+    </fieldset>
+    <fieldset>
+      <legend>Топливо</legend>
+      <div>
+        <input type="radio" id="metu" name="fuel" value="metu" checked />
+        <label for="metu">Металлический уран</label>
+      </div>
+
+      <div>
+        <input type="radio" id="uo2" name="fuel" value="uo2" />
+        <label for="uo2">Диоксид урана</label>
+      </div>
+
+      <div>
+        <input type="radio" id="th20" name="fuel" value="th20" />
+        <label for="th20">Диоксид тория</label>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Полость для продуктов деления</legend>
+      <div>
+        <input type="radio" id="est" name="PD" value="est" checked />
+        <label for="est">Есть</label>
+      </div>
+      <div>
+        <input type="radio" id="net" name="PD" value="net" />
+        <label for="net">Нет</label>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Материал оболочки</legend>
+      <div>
+        <input type="radio" id="zr" name="case" value="zr" checked />
+        <label for="zr">Циркониевый сплав</label>
+      </div>
+      <div>
+        <input type="radio" id="steel" name="case" value="steel" />
+        <label for="steel">Сталь</label>
+      </div>
+
+      <div>
+        <input type="radio" id="chugun" name="case" value="chugun" />
+        <label for="chugun">Чугун</label>
+      </div>
+    </fieldset>
+    <button id='loadTvel'>Построить</button>
+</div>
+
+<div id="tab2" class="tab-content">
+    <fieldset>
+      <legend>Тип решётки твэлов и твс</legend>
+      <div style="display: flex;">
+          <div>
+            <div>
+                <img src="static\interface\tvs_six.png" style="height: 100px;">
+            </div>
+            <input type="radio" id="six" name="tvs-form" value="six" checked />
+            <label for="six">Шестигранная</label>
+          </div>
+          <div>
+            <div>
+                <img src="static\interface\tvs_square.png" style="height: 100px;">
+            </div>   
+            <input type="radio" id="square" name="tvs-form" value="square" />
+            <label for="square">Квадратная</label>
+          </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Замедлитель</legend>
+      <div>
+        <input type="radio" id="heavy" name="zamedl" value="heavy" checked />
+        <label for="heavy">Тяжёлая вода</label>
+      </div>
+
+      <div>
+        <input type="radio" id="water" name="zamedl" value="water" />
+        <label for="water">Обычная вода</label>
+      </div>
+
+      <div>
+        <input type="radio" id="grafit" name="zamedl" value="grafit" />
+        <label for="grafit">Графит</label>
+      </div>
+    </fieldset>   
+
+    <fieldset>
+      <legend>Теплоноситель</legend>
+      <div>
+        <input type="radio" id="water_cooler" name="cooler" value="water_cooler" checked />
+        <label for="water_cooler">Вода</label>
+      </div>
+
+      <div>
+        <input type="radio" id="natruim" name="cooler" value="natruim" />
+        <label for="natruim">Жидкий натрий</label>
+      </div>
+
+      <div>
+        <input type="radio" id="lead" name="cooler" value="lead" />
+        <label for="lead">Жидкий свинец</label>
+      </div>
+    </fieldset> 
+
+    <fieldset>
+      <legend>Дистанционирующие решётки</legend>
+      <img src="static\interface\tvs_dr.png" style="height: 80px;">
+      <div>
+        <input type="radio" id="dist_yes" name="dist" value="dist_yes" checked />
+        <label for="dist_yes">Есть</label>
+      </div>
+
+      <div>
+        <input type="radio" id="dist_net" name="dist" value="dist_net" />
+        <label for="dist_net">Нет</label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Выгорающий поглотитель</legend>
+      <div>
+        <input type="radio" id="vyg_est" name="vygor" value="vyg_est" checked />
+        <label for="vyg_est">Есть</label>
+      </div>
+
+      <div>
+        <input type="radio" id="vyg_net" name="vygor" value="vyg_net" />
+        <label for="vyg_net">Нет</label>
+      </div>
+    </fieldset> 
+
+    <button id='tvsBtn'>Построить</button>
+</div>
+
+<div id="tab3" class="tab-content">
+    <fieldset>
+      <legend>Компоновка реакторной установки</legend>
+      <div style="display: flex;">
+          <div>
+            <div>
+                <img src="static\interface\komp_petl.png" style="height: 100px;">
+            </div>
+            <input type="radio" id="loop" name="reactor-form" value="loop" checked />
+            <label for="loop">Петлевая</label>
+          </div>
+          <div>
+            <div>
+                <img src="static\interface\komp_block.png" style="height: 100px;">
+            </div>   
+            <input type="radio" id="block" name="reactor-form" value="block" />
+            <label for="block">Блочная</label>
+          </div>
+          <div>
+            <div>
+                <img src="static\interface\komp_int.png" style="height: 100px;">
+            </div>   
+            <input type="radio" id="integral" name="reactor-form" value="integral" />
+            <label for="integral">Интегральная</label>
+          </div>
+          <div>
+            <div>
+                <img src="static\interface\komp_kanal.png" style="height: 100px;">
+            </div>   
+            <input type="radio" id="kanal" name="reactor-form" value="kanal" />
+            <label for="kanal">Канальная</label>
+          </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Количество петель</legend>
+      <form>
+          <select name="count_loops">
+            <option value="">-- Выберите количество --</option>
+            <option value="0">Нет петель</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
+      </form>
+    </fieldset>
+
+    <fieldset>
+      <legend>Антидебризные фильтры</legend>
+      <img src="static\interface\tvs_adf.png" style="height: 80px;">
+      <div>
+        <input type="radio" id="deb_est" name="debrise" value="deb_est" checked />
+        <label for="deb_est">Есть</label>
+      </div>
+
+      <div>
+        <input type="radio" id="deb_net" name="debrise" value="deb_net" />
+        <label for="deb_net">Нет</label>
+      </div>
+    </fieldset> 
+
+    <button id='reactorBtn'>Построить</button>
+
+</div>
+
+<div id="tab4" class="tab-content">
+    <fieldset>
+      <legend>Тип поверхности теплообмена (трубочек)</legend>
+      <div style="display: flex;">
+          <div>
+            <div>
+                <img src="static\interface\tube_u.png" style="height: 100px;">
+            </div>
+            <input type="radio" id="u_obraz" name="tube-form" value="u_obraz" checked />
+            <label for="u_obraz">U-образные трубы</label>
+          </div>
+          <div>
+            <div>
+                <img src="static\interface\tube_straight.png" style="height: 100px;">
+            </div>   
+            <input type="radio" id="straight" name="tube-form" value="straight" />
+            <label for="straight">Прямые трубы</label>
+          </div>
+          <div>
+            <div>
+                <img src="static\interface\tube_zmeev_2.png" style="height: 100px;">
+            </div>   
+            <input type="radio" id="zmeev" name="tube-form" value="zmeev" />
+            <label for="zmeev">Змеевики</label>
+          </div>
+          <!-- <div>
+            <div>
+                <img src="static\interface\tube_fild.png" style="height: 100px;">
+            </div>   
+            <input type="radio" id="fild" name="tube-form" value="fild" />
+            <label for="fild">Трубки Фильда</label>
+          </div> -->
+      </div>
+    </fieldset>
+
+    <!-- <fieldset>
+      <legend>Наличие парогенератора</legend>
+      <div>
+        <input type="radio" id="pg_yes" name="is_pg" value="pg_yes" checked />
+        <label for="pg_yes">Есть</label>
+      </div>
+
+      <div>
+        <input type="radio" id="pg_no" name="is_pg" value="pg_no" />
+        <label for="pg_no">Нет</label>
+      </div>
+    </fieldset>  -->
+
+    <fieldset>
+      <legend>Наличие дистанционирующих решёток</legend>
+      <div>
+        <input type="radio" id="pg_dist_yes" name="is_pg_dist" value="pg_dist_yes" checked />
+        <label for="pg_dist_yes">Есть</label>
+      </div>
+
+      <div>
+        <input type="radio" id="pg_dist_no" name="is_pg_dist" value="pg_dist_no" />
+        <label for="pg_dist_no">Нет</label>
+      </div>
+    </fieldset> 
+
+    <button id='pgBtn'>Построить</button>
+</div>
+
+<div id="tab5" class="tab-content">
+    <div>
+        <div>
+            <img src="static\interface\tepl_gzn.png" style="height: 100px;">
+        </div>   
+        <input type="checkbox" id="tepl_gzn" name="teplo" value="tepl_gzn" />
+        <label for="tepl_gzn">ГЦН</label>
+    </div>
+    <div>
+        <div>
+            <img src="static\interface\tepl_nasos.png" style="height: 100px;">
+        </div>   
+        <input type="checkbox" id="tepl_nasos" name="teplo2" value="tepl_nasos" />
+        <label for="tepl_nasos">Питательный насос</label>
+    </div>
+    <div>
+        <div>
+            <img src="static\interface\tepl_elmag.png" style="height: 100px;">
+        </div>   
+        <input type="checkbox" id="tepl_elmag" name="teplo3" value="tepl_elmag" />
+        <label for="tepl_elmag">Электромагнитный насос</label>
+    </div>
+    <div>
+        <div>
+            <img src="static\interface\tepl_turbine.png" style="height: 100px; padding-right: 10px;">
+        </div>   
+        <input type="checkbox" id="tepl_turbine" name="teplo4" value="tepl_turbine" />
+        <label for="tepl_turbine">Турбина</label>
+    </div>
+    <div>
+        <div>
+            <img src="static\interface\tepl_cond.png" style="height: 100px;">
+        </div>   
+        <input type="checkbox" id="tepl_cond" name="teplo5" value="tepl_cond" />
+        <label for="tepl_cond">Конденсатор</label>
+    </div>
+    <!-- <div>
+        <div>
+            <img src="static\interface\tepl_dear.png" style="height: 100px;">
+        </div>   
+        <input type="checkbox" id="tepl_dear" name="teplo" value="tepl_dear" />
+        <label for="tepl_dear">Деаэратор</label>
+    </div> -->
+    <button id="btnTeplo">Построить</button>
+</div>
+
+<div id="tab6" class="tab-content">
+    <div>
+        <div>
+            <img src="static\interface\sb_germo.png" style="height: 100px;">
+        </div>   
+        <input type="checkbox" id="sb_germo" name="sb" value="sb_germo" />
+        <label for="sb_germo">Гермооболочка</label>
+    </div>
+    <div>
+        <div>
+            <img src="static\interface\sb_suz.png" style="height: 100px;">
+        </div>   
+        <input type="checkbox" id="sb_suz" name="sb" value="sb_suz" />
+        <label for="sb_suz">Стержни СУЗ и АЗ</label>
+    </div>
+    <div>
+        <div>
+            <img src="static\interface\sb_ge.png" style="height: 100px;">
+        </div>   
+        <input type="checkbox" id="sb_ge" name="sb" value="sb_ge" />
+        <label for="sb_ge">Гидроёмкости охлаждения</label>
+    </div>
+    <div>
+        <div>
+            <img src="static\interface\sb_trap.png" style="height: 100px;">
+        </div>   
+        <input type="checkbox" id="sb_trap" name="sb" value="sb_trap" />
+        <label for="sb_trap">Ловушка расплава</label>
+    </div>
+    <div>
+        <div>
+            <img src="static\interface\sb_sprink.png" style="height: 100px;">
+        </div>   
+        <input type="checkbox" id="sb_sprink" name="sb" value="sb_sprink" />
+        <label for="sb_sprink">Спринклерная система</label>
+    </div>
+    <div>
+        <div>
+            <img src="static\interface\sb_sliv.png" style="height: 100px;">
+        </div>   
+        <input type="checkbox" id="sb_sliv" name="sb" value="sb_sliv" />
+        <label for="sb_sliv">Слив воды</label>
+    </div>
+    <button>Построить</button>
+</div>
+
+<div id="tab7" class="tab-content">
+    <div>
+        <div>
+            <img src="static\interface\rb_conc.png" style="height: 100px;">
+        </div>   
+        <input type="checkbox" id="rb_conc" name="rb1" value="rb_conc" />
+        <label for="rb_conc">Бетон</label>
+    </div>
+    <!-- <div>
+        <div>
+            <img src="static\interface\rb_zhvz.png" style="height: 100px;">
+        </div>   
+        <input type="checkbox" id="rb_zhvz" name="rb" value="rb_zhvz" />
+        <label for="rb_zhvz">Железо-водная защита</label>
+    </div> -->
+    <div>
+        <div>
+            <img src="static\interface\rb_lead.png" style="height: 100px;">
+        </div>   
+        <input type="checkbox" id="rb_lead" name="rb2" value="rb_lead" />
+        <label for="rb_lead">Свинец</label>
+    </div>
+    <div>
+        <div>
+            <img src="static\interface\rb_wood.png" style="height: 100px;">
+        </div>   
+        <input type="checkbox" id="rb_wood" name="rb3" value="rb_wood" />
+        <label for="rb_wood">Дерево</label>
+    </div>
+    <div>
+        <div>
+            <img src="static\interface\rb_sand.png" style="height: 100px;">
+        </div>   
+        <input type="checkbox" id="rb_sand" name="rb4" value="rb_sand" />
+        <label for="rb_sand">Песок</label>
+    </div>
+    <button id="btnRadBez">Построить</button>
+</div>
+
+<div id="tab8" class="tab-content">
+    <fieldset>
+        <legend>Управление</legend>
+        <button id="Start">Пуск</button>
+        <button>Останов</button>
+    </fieldset>
+    <fieldset>
+        <legend>Небольшие инциденты</legend>
+        <button>Посторонние предметы в контуре</button>
+        <button>Коррозия</button>
+    </fieldset>
+    <fieldset>
+        <legend>Серьёзные происшествия</legend>
+        <button>Отключение электроэнергии</button>
+        <button>Цунами + Землетрясение</button>
+        <!-- <button>Падение самолёта</button> -->
+        <button>Отказ насоса (ГЦН)</button>
+    </fieldset>
+</div>
+
+<!-- JavaScript для переключения вкладок -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function () {
+                // Убираем активность у всех вкладок и контента
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(tc => tc.classList.remove('active'));
+
+                // Делаем активной выбранную вкладку и её содержимое
+                tab.classList.add('active');
+                const contentId = tab.getAttribute('data-tab');
+                document.getElementById(contentId).classList.add('active');
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
+<!-- Подключаем библиотеки алертов -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.12.15/dist/sweetalert2.all.min.js"></script>
+<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/sweetalert2@7.12.15/dist/sweetalert2.min.css'>
+<script>
+// Функция для отображения кастомного alert
+function explainTask(message) {
+  const modal = document.getElementById('customAlert');
+  const alertMessage = document.getElementById('alertMessage');
+  const closeButton = document.getElementById('closeAlert');
+
+  // Устанавливаем сообщение
+  alertMessage.textContent = message;
+
+  // Показываем модальное окно
+  modal.style.display = 'flex';
+
+  // Закрываем модальное окно при нажатии на кнопку
+  closeButton.onclick = function() {
+    modal.style.display = 'none';
+  };
+
+  // Закрываем модальное окно, если нажать на фон
+  modal.onclick = function(e) {
+    if (e.target === modal) {
+      modal.style.display = 'none';
+    }
+  };
+}
+
+function errorAlert(message) {
+  const modal = document.getElementById('errorAlert');
+  const alertMessage = document.getElementById('errorMessage');
+  const closeButton = document.getElementById('closeErrorAlert');
+
+  // Устанавливаем сообщение
+  alertMessage.textContent = message;
+
+  // Показываем модальное окно
+  modal.style.display = 'flex';
+
+  // Закрываем модальное окно при нажатии на кнопку
+  closeButton.onclick = function() {
+    modal.style.display = 'none';
+  };
+
+  // Закрываем модальное окно, если нажать на фон
+  modal.onclick = function(e) {
+    if (e.target === modal) {
+      modal.style.display = 'none';
+    }
+  };
+}
+
+// Вызов кастомного alert
+explainTask('Вы выбрали современный путь (без обучающих подсказок). Вы должны сконструировать АЭС большой мощности, обладающую максимальной безопасностью и экономической эффективностью. В вашей стране есть залежи урана.');
+</script>
+
+<!-- Графика и логика симулятора -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// Основная функция
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, 600 / 400, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(1400, 450);
+renderer.setClearColor(0xffffff);
+document.getElementById('three-container').appendChild(renderer.domElement);
+
+// Константы для координат
+const xCoord = -5;
+const yCoord = 0;
+const zCoord = 0;
+
+const tvs_xCoord = -4;
+const tvs_yCoord = 0;
+
+const reactor_xCoord = -2;
+const reactor_yCoord = 0;
+
+const pg_xCoord = 1;
+const pg_yCoord = 0;
+
+
+// Функция отрисовки твэла
+function loadTvel() {
+  // Загружаем текстуру (картинку)
+  const textureLoader = new THREE.TextureLoader();
+  const selectedValue = document.querySelector('input[name="tvel-form"]:checked').value;
+  let texture = textureLoader.load('static/vver/tvel_cyl.png');  // Укажите путь к вашему изображению 
+  if (selectedValue=='cyl') {
+    texture = textureLoader.load('static/vver/tvel_cyl.png');
+    } 
+  else {
+    texture = textureLoader.load('static/vver/tvel_krest.png');
+    }
+  const fuel = document.querySelector('input[name="fuel"]:checked').value;
+  const pd = document.querySelector('input[name="PD"]:checked').value;
+  // const case = document.querySelector('input[name="case"]:checked').value;
+  // const percentage = document.querySelector('input[class="slider"]:checked').value;
+  const percentage = document.getElementById('slider').value;
+  if ((fuel=='metu'||fuel=='uo2')  && (percentage>4 && percentage<20)) {
+      // Создаем плоскость, на которую наложим текстуру
+      const geometry = new THREE.PlaneGeometry(0.3, 5);  // Размер плоскости
+      const material = new THREE.MeshBasicMaterial({ map: texture });
+      const plane = new THREE.Mesh(geometry, material);
+
+      // Устанавливаем позицию изображения на заданные координаты
+      plane.position.set(xCoord, yCoord, zCoord);
+
+      // Добавляем плоскость в сцену
+      scene.add(plane);
+
+      // Камера
+      camera.position.z = 5;
+
+      // Функция анимации для рендеринга
+      function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+      animate();
+  } else {
+    errorAlert('Ваш твэл не соответствует пути. Возможно, ваше обогащение не соответствует нормам МАГАТЭ для гражданской техники. Или вы выбрали топливо, которого нет в вашей стране.');
+  }
+  
+}
+
+function printTVS() {
+  // Загружаем текстуру (картинку)
+  const textureLoader = new THREE.TextureLoader();
+  const selectedValue = document.querySelector('input[name="tvs-form"]:checked').value;
+  let texture = textureLoader.load('static/vver/tvs_six.png');  // Укажите путь к вашему изображению 
+  if (selectedValue=='six') {
+    texture = textureLoader.load('static/vver/tvs_six.png');
+    } 
+  else {
+    texture = textureLoader.load('static/vver/tvs_square.png');
+    }
+  const zamedl = document.querySelector('input[name="zamedl"]:checked').value;
+  const cooler = document.querySelector('input[name="cooler"]:checked').value;
+  const dist = document.querySelector('input[name="dist"]:checked').value;
+
+  if (zamedl=='water' && cooler=='water_cooler' && dist=='dist_yes') {
+    // Создаем плоскость, на которую наложим текстуру
+      const geometry = new THREE.PlaneGeometry(0.3, 5);
+      const material = new THREE.MeshBasicMaterial({ map: texture });
+      const plane = new THREE.Mesh(geometry, material);
+
+      // Устанавливаем позицию изображения на заданные координаты
+      plane.position.set(tvs_xCoord, tvs_yCoord, zCoord);
+
+      // Добавляем плоскость в сцену
+      scene.add(plane);
+
+      // Камера
+      camera.position.z = 5;
+
+      // Функция анимации для рендеринга
+      function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+      animate();
+  }
+  else {
+    errorAlert('Ваша ТВС несовместима с выбранным путём. Возможно, вы выбрали неправильный замедлитель, теплоноситель или отсутсвуют дистанционирующие решётки.')
+  }
+  
+}
+
+function printReactor() {
+  // Загружаем текстуру (картинку)
+  const textureLoader = new THREE.TextureLoader();
+  const selectedValue = document.querySelector('input[name="reactor-form"]:checked').value;
+  // const count_loops = document.querySelector('input[name="reactor-form"]:checked').value;
+  const count_loops = document.querySelector('select[name="count_loops"]').value;
+  let texture = textureLoader.load('static/vver/reactor_vver.jpg');  // Укажите путь к вашему изображению 
+  if (selectedValue=='loop' && count_loops > 2) {
+  // Создаем плоскость, на которую наложим текстуру
+  const geometry = new THREE.PlaneGeometry(0.75, 4);  // Размер плоскости
+  const material = new THREE.MeshBasicMaterial({ map: texture });
+  const plane = new THREE.Mesh(geometry, material);
+
+  // Устанавливаем позицию изображения на заданные координаты
+  plane.position.set(reactor_xCoord, reactor_yCoord, zCoord);
+
+  // Добавляем плоскость в сцену
+  scene.add(plane);
+
+  // Камера
+  camera.position.z = 5;
+
+  //рисуем трубопровод
+    const pipe_material = new THREE.LineBasicMaterial( 
+        { color: 0x1a1a1a, 
+          linewidth: 50,
+          linecap: 'round'
+        } );
+
+    const points = [];
+    points.push( new THREE.Vector3( -1.75, 0, 0 ) );
+    points.push( new THREE.Vector3( -1, 0, 0 ) );
+    points.push( new THREE.Vector3( -1, 1, 0 ) );
+    points.push( new THREE.Vector3( 1, 1, 0 ) );
+    points.push( new THREE.Vector3( 1, -1.5, 0 ) );
+    points.push( new THREE.Vector3( -1, -1.5, 0 ) );
+    points.push( new THREE.Vector3( -1, -0.4, 0 ) );
+    points.push( new THREE.Vector3( -1.75, -0.4, 0 ) );
+
+    const pipe_geometry = new THREE.BufferGeometry().setFromPoints( points );
+
+    const pipe = new THREE.Line( pipe_geometry, pipe_material );
+
+    scene.add(pipe);
+    renderer.render( scene, camera );
+
+  // Функция анимации для рендеринга
+  function animate() {
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+  }
+  animate();
+} else {
+    errorAlert("Вы выбрали неправильную компоновку или количество петель.")
+}
+}
+
+function printPG() {
+  // Загружаем текстуру (картинку)
+  const textureLoader = new THREE.TextureLoader();
+  const is_pg_dist = document.querySelector('input[name="is_pg_dist"]:checked').value;
+  let texture = textureLoader.load('static/vver/pg_vver.png');  // Укажите путь к вашему изображению 
+  if (is_pg_dist=='pg_dist_yes') {
+
+      // Создаем плоскость, на которую наложим текстуру
+      const geometry = new THREE.PlaneGeometry(1.5, 1.2);  // Размер плоскости
+      const material = new THREE.MeshBasicMaterial({ map: texture });
+      const plane = new THREE.Mesh(geometry, material);
+
+      // Устанавливаем позицию изображения на заданные координаты
+      plane.position.set(pg_xCoord, pg_yCoord, zCoord);
+
+      // Добавляем плоскость в сцену
+      scene.add(plane);
+
+      // Камера
+      camera.position.z = 5;
+
+      //рисуем трубопровод
+        const pipe_material = new THREE.LineBasicMaterial( 
+            { color: 0x1a1a1a, 
+              linewidth: 10,
+              linecap: 'round'
+            } );
+
+        const points = [];
+
+        points.push( new THREE.Vector3( 1.5, 0.6, 0 ) );
+        points.push( new THREE.Vector3( 1.5, 1, 0 ) );
+        points.push( new THREE.Vector3( 4, 1, 0 ) );
+        points.push( new THREE.Vector3( 4, -2, 0 ) );
+        points.push( new THREE.Vector3( 1.5, -2, 0 ) );
+        points.push( new THREE.Vector3( 1.5, -0.5, 0 ) );
+
+
+        const pipe_geometry = new THREE.BufferGeometry().setFromPoints( points );
+
+        const pipe = new THREE.Line( pipe_geometry, pipe_material );
+
+        scene.add(pipe);
+        renderer.render( scene, camera );
+
+      // Функция анимации для рендеринга
+      function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+      animate();
+  }
+  else {
+    errorAlert('Не хватает дистанционирующих решёток для трубочек парогенератора.')
+  }
+}
+
+function printGZN() {
+  // Загружаем текстуру (картинку)
+  const textureLoader = new THREE.TextureLoader();
+  const is_gzn = document.querySelector('input[name="teplo"]:checked').value;
+  let texture = textureLoader.load('static/vver/gzn.png');  // Укажите путь к вашему изображению 
+  if (is_gzn=='tepl_gzn') {
+
+      // Создаем плоскость, на которую наложим текстуру
+      const geometry = new THREE.PlaneGeometry(0.3, 1.2);  // Размер плоскости
+      const material = new THREE.MeshBasicMaterial({ map: texture });
+      const plane = new THREE.Mesh(geometry, material);
+
+      // Устанавливаем позицию изображения на заданные координаты
+      plane.position.set(0, -1.5, zCoord);
+
+      // Добавляем плоскость в сцену
+      scene.add(plane);
+
+      // Камера
+      camera.position.z = 5;
+
+      renderer.render( scene, camera );
+
+      // Функция анимации для рендеринга
+      function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+      animate();
+  }
+}
+
+function printPitNasos() {
+  // Загружаем текстуру (картинку)
+  const textureLoader = new THREE.TextureLoader();
+  const is_pit_nasos = document.querySelector('input[name="teplo2"]:checked').value;
+  let texture = textureLoader.load('static/vver/pit_nasos.jpg');  // Укажите путь к вашему изображению 
+  if (is_pit_nasos=='tepl_nasos') {
+
+      // Создаем плоскость, на которую наложим текстуру
+      const geometry = new THREE.PlaneGeometry(1, 1);  // Размер плоскости
+      const material = new THREE.MeshBasicMaterial({ map: texture });
+      const plane = new THREE.Mesh(geometry, material);
+
+      // Устанавливаем позицию изображения на заданные координаты
+      plane.position.set(3, -2, zCoord);
+
+      // Добавляем плоскость в сцену
+      scene.add(plane);
+
+      // Камера
+      camera.position.z = 5;
+
+      renderer.render( scene, camera );
+
+      // Функция анимации для рендеринга
+      function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+      animate();
+  }
+}
+
+function printPitNasos() {
+  // Загружаем текстуру (картинку)
+  const textureLoader = new THREE.TextureLoader();
+  const is_pit_nasos = document.querySelector('input[name="teplo2"]:checked').value;
+  let texture = textureLoader.load('static/vver/pit_nasos.jpg');  // Укажите путь к вашему изображению 
+  if (is_pit_nasos=='tepl_nasos') {
+
+      // Создаем плоскость, на которую наложим текстуру
+      const geometry = new THREE.PlaneGeometry(1, 1);  // Размер плоскости
+      const material = new THREE.MeshBasicMaterial({ map: texture });
+      const plane = new THREE.Mesh(geometry, material);
+
+      // Устанавливаем позицию изображения на заданные координаты
+      plane.position.set(2, -2, zCoord);
+
+      // Добавляем плоскость в сцену
+      scene.add(plane);
+
+      // Камера
+      camera.position.z = 5;
+
+      renderer.render( scene, camera );
+
+      // Функция анимации для рендеринга
+      function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+      animate();
+  }
+}
+
+function printTurbine() {
+  // Загружаем текстуру (картинку)
+  const textureLoader = new THREE.TextureLoader();
+  const is_turbine = document.querySelector('input[name="teplo4"]:checked').value;
+  let texture = textureLoader.load('static/vver/turbine.jpg');  // Укажите путь к вашему изображению 
+  if (is_turbine=='tepl_turbine') {
+
+      // Создаем плоскость, на которую наложим текстуру
+      const geometry = new THREE.PlaneGeometry(1, 1);  // Размер плоскости
+      const material = new THREE.MeshBasicMaterial({ map: texture });
+      const plane = new THREE.Mesh(geometry, material);
+
+      // Устанавливаем позицию изображения на заданные координаты
+      plane.position.set(4, 0, zCoord);
+
+      // Добавляем плоскость в сцену
+      scene.add(plane);
+
+      // Камера
+      camera.position.z = 5;
+
+      renderer.render( scene, camera );
+
+      // Функция анимации для рендеринга
+      function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+      animate();
+  }
+}
+
+function printCondensator() {
+  // Загружаем текстуру (картинку)
+  const textureLoader = new THREE.TextureLoader();
+  const is_condensator = document.querySelector('input[name="teplo5"]:checked').value;
+  let texture = textureLoader.load('static/vver/condensator.png');  // Укажите путь к вашему изображению 
+  if (is_condensator=='tepl_cond') {
+
+      // Создаем плоскость, на которую наложим текстуру
+      const geometry = new THREE.PlaneGeometry(1, 1);  // Размер плоскости
+      const material = new THREE.MeshBasicMaterial({ map: texture });
+      const plane = new THREE.Mesh(geometry, material);
+
+      // Устанавливаем позицию изображения на заданные координаты
+      plane.position.set(4, -2, zCoord);
+
+      // Добавляем плоскость в сцену
+      scene.add(plane);
+
+      // Камера
+      camera.position.z = 5;
+
+      renderer.render( scene, camera );
+
+      // Функция анимации для рендеринга
+      function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+      animate();
+  }
+}
+
+function printRadBez() {
+  let is_beton = 0;
+  try {
+    is_beton = document.querySelector('input[name="rb1"]:checked').value;
+  }
+  catch(exceptionVar) {
+    is_beton = 0;
+  }
+
+  let is_lead = 0;
+  try {
+    is_lead = document.querySelector('input[name="rb2"]:checked').value;
+  }
+  catch(exceptionVar) {
+    is_lead = 0;
+  }
+
+  let is_wood = 0;
+  try {
+    is_wood = document.querySelector('input[name="rb3"]:checked').value;
+  }
+  catch(exceptionVar) {
+    is_wood = 0;
+  }
+
+  let is_sand = 0;
+  try {
+    is_sand = document.querySelector('input[name="rb4"]:checked').value;
+  }
+  catch(exceptionVar) {
+    is_sand = 0;
+  }
+
+  const textureLoader = new THREE.TextureLoader();
+  let texture = textureLoader.load('static/vver/beton.png');  // Укажите путь к вашему изображению 
+  console.log(is_beton, is_lead, is_wood, is_sand);
+  if ((is_beton == 'rb_conc' || is_lead == 'rb_lead') && (is_wood == 0 && is_sand == 0)) {
+
+      // Создаем плоскость, на которую наложим текстуру
+      const geometry = new THREE.PlaneGeometry(0.25, 1.5);  // Размер плоскости
+      const material = new THREE.MeshBasicMaterial({ map: texture });
+      const plane = new THREE.Mesh(geometry, material);
+      const plane2 = new THREE.Mesh(geometry, material);
+
+      // Устанавливаем позицию изображения на заданные координаты
+      plane.position.set(-1.5, -1.25, zCoord);
+      plane2.position.set(-2.6, -1.25, zCoord);
+
+      // Добавляем плоскость в сцену
+      scene.add(plane);
+      scene.add(plane2);
+
+      // Камера
+      camera.position.z = 5;
+
+      renderer.render( scene, camera );
+
+      // Функция анимации для рендеринга
+      function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+      animate();
+  }
+
+  else {
+    errorAlert('Выбраны неправильные материалы для биологической защиты. Персонал АЭС откажется работать.')
+  }
+}
+
+function animateTurbine() {
+  // Основная сцена Three.js
+  // const scene = new THREE.Scene();
+  // const camera = new THREE.PerspectiveCamera(75, 600 / 400, 0.1, 1000);
+  // const renderer = new THREE.WebGLRenderer();
+  // renderer.setSize(600, 400);
+  // document.getElementById('three-container').appendChild(renderer.domElement);
+
+  // Загружаем GIF анимацию как текстуру
+  const textureLoader = new THREE.TextureLoader();
+  const gifTexture = textureLoader.load('static/vver/test_gif.gif');  // Укажите путь к вашему GIF
+
+  // Создаем материал для плоскости с GIF
+  const material = new THREE.MeshBasicMaterial({ map: gifTexture });
+
+  // Создаем геометрию плоскости
+  const geometry = new THREE.PlaneGeometry(4, 4);
+
+  // Создаем объект Mesh
+  const plane = new THREE.Mesh(geometry, material);
+  scene.add(plane);
+
+  // Камера
+  camera.position.z = 5;
+
+  // Функция анимации
+  function animate() {
+    requestAnimationFrame(animate);
+    gifTexture.needsUpdate = true;
+    renderer.render(scene, camera);
+  }
+
+  // Запускаем анимацию
+  animate();
+}
+
+
+// Построение техники по нажатиям кнопок
+document.getElementById('loadTvel').addEventListener('click', function() {
+  loadTvel();
+});
+document.getElementById('tvsBtn').addEventListener('click', function() {
+  printTVS();
+});
+document.getElementById('reactorBtn').addEventListener('click', function() {
+  printReactor();
+});
+document.getElementById('pgBtn').addEventListener('click', function() {
+  printPG();
+});
+document.getElementById('btnTeplo').addEventListener('click', function() {
+  let is_gzn = 0;
+  try {
+    is_gzn = document.querySelector('input[name="teplo"]:checked').value;
+  }
+  catch(exceptionVar) {
+    is_gzn = 0;
+  }
+
+  let is_pit_nasos = 0;
+  try {
+    is_pit_nasos = document.querySelector('input[name="teplo2"]:checked').value;
+  }
+  catch(exceptionVar) {
+    is_pit_nasos = 0;
+  }
+
+  let is_elmag = 0;
+  try {
+    is_elmag = document.querySelector('input[name="teplo3"]:checked').value;
+  }
+  catch(exceptionVar) {
+    is_elmag = 0;
+  }
+
+  let is_turbine = 0;
+  try {
+    is_turbine = document.querySelector('input[name="teplo4"]:checked').value;
+  }
+  catch(exceptionVar) {
+    is_turbine = 0;
+  }
+
+  let is_condensator = 0;
+  try {
+    is_condensator = document.querySelector('input[name="teplo5"]:checked').value;
+  }
+  catch(exceptionVar) {
+    is_condensator = 0;
+  }
+  // console.log(is_gzn, is_pit_nasos, is_elmag, is_turbine, is_condensator);
+  if (
+    (is_elmag == 0) &&
+    (is_gzn == 'tepl_gzn' && is_pit_nasos == 'tepl_nasos' && is_turbine == 'tepl_turbine' && is_condensator == 'tepl_cond')
+  ) 
+  {
+    try {
+      printGZN();
+    }
+      catch (exceptionVar) {
+    }
+    try {
+      printPitNasos();
+    }
+    catch(exceptionVar) {
+    }
+    try {
+      printTurbine();
+    }
+    catch (exceptionVar) {
+    }
+    try {
+      printCondensator();
+    }
+    catch (exceptionVar){
+    }
+  }
+  else {
+    errorAlert('Неправильный набор теплотехники для этой установки.')
+  }
+  
+});
+document.getElementById('btnRadBez').addEventListener('click', function() {
+  printRadBez();
+});
+document.getElementById('Start').addEventListener('click', function() {
+  animateTurbine();
+});
+</script>

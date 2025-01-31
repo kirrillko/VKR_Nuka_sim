@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="/static/atom.png">
+    <link rel="stylesheet" href="/static/style.css">
+    <title>Симулятор конструирования ядерных реакторов</title>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="/">Главная</a></li>
+                <li><a href="/tutorial">Инструкция</a></li>
+                <li><a href="/about">О сайте</a></li>
+                <li><a href="/feedback">Обратная связь</a></li>
+                <li><a href="/terms">Термины</a></li>
+                <li><a href="/sources">Источники</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    <footer>
+        <p>Сайт разработан независимым инди-разработчиком.</p>
+    </footer>
+</body>
+</html>

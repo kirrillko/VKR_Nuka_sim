@@ -1,0 +1,11 @@
+Model Information:
+* title:	Velociraptor Walk
+* source:	https://sketchfab.com/3d-models/velociraptor-walk-e0b875a590be40e7a2db3e3575692f9c
+* author:	Msassasa (https://sketchfab.com/LilCick)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Velociraptor Walk" (https://sketchfab.com/3d-models/velociraptor-walk-e0b875a590be40e7a2db3e3575692f9c) by Msassasa (https://sketchfab.com/LilCick) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

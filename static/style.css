@@ -1,0 +1,89 @@
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+}
+
+header {
+    background-color: #003366; /* Тёмно-синий цвет */
+    padding: 10px;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    justify-content: flex-start; /* Расположение элементов в строку */
+}
+
+nav ul li {
+    margin-right: 20px; /* Пробел между элементами */
+}
+
+nav ul li:last-child {
+    margin-right: 0; /* Убираем правый отступ у последнего элемента */
+}
+
+nav ul li a {
+    color: white; /* Цвет текста ссылок */
+}
+
+footer {
+    margin-top: auto; /* Отодвигает footer вниз */
+    text-align: center; /* Выравнивание по центру */
+    background-color: #f8f9fa;
+    padding: 10px;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap; /* Позволяет оборачивать элементы */
+    justify-content: space-between; /* Распределяет пространство между блоками */
+}
+
+.block {
+    background-size: cover; /* Заполнение блока изображением */
+    background-position: center; /* Центрирование изображения */
+    color: white; /* Цвет текста */
+    padding: 20px; /* Отступы внутри блока */
+    margin: 10px; /* Отступы между блоками */
+    border-radius: 8px; /* Скругление углов */
+    height: 200px; /* Высота блока */
+    width: calc(30.333% - 20px); /* Ширина блока, чтобы поместились 3 в строке */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Центрирование содержимого по вертикали */
+    align-items: center; /* Центрирование содержимого по горизонтали */
+    text-align: center; /* Выравнивание текста по центру */
+}
+
+.block ul {
+    padding: 0; /* Убираем отступы у списка */
+    list-style: none; /* Убираем маркеры у списка */
+}
+
+.block ul li {
+    margin: 10px 0; /* Отступы между ссылками */
+}
+
+.block ul li a {
+    display: block; /* Чтобы ссылка занимала всю ширину блока */
+    background-color: gray; /* Цвет фона ссылки */
+    color: white; /* Цвет текста ссылки */
+    padding: 10px; /* Отступы внутри ссылки */
+    text-decoration: none; /* Убираем подчеркивание */
+    border-radius: 4px; /* Скругление углов ссылок */
+    transition: background-color 0.3s; /* Плавный переход для эффекта наведения */
+}
+
+.block ul li a:hover {
+    background-color: darkgray; /* Цвет фона при наведении */
+}
+
+.block h2 {
+    background-color: gray; /* Цвет фона заголовка */
+    padding: 10px; /* Отступы внутри заголовка */
+    border-radius: 4px; /* Скругление углов заголовка */
+    margin: 0 0 10px 0; /* Убираем верхний отступ и добавляем нижний */
+}
