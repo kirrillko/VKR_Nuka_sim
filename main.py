@@ -26,14 +26,6 @@ def sources():
 def simulator():
     return render_template("simulator.html")
 
-@app.route("/test_gif")
-def test_gif():
-    return render_template("test_animation.html")
-
-@app.route("/test_turbine")
-def test_turbine():
-    return render_template("test_turbine.html")
-
 @app.route("/test_3d")
 def test_3d():
     return render_template("test_3D.html")
