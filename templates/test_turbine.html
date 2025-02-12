@@ -29,6 +29,10 @@
     renderer.setSize(600, 400);
     document.getElementById('three-container').appendChild(renderer.domElement);
 
+    function pause(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
     // Загружаем GIF анимацию как текстуру
     function testAnimation(path) {
       const textureLoader = new THREE.TextureLoader();
@@ -47,10 +51,17 @@
       // Камера
       camera.position.z = 5;
 
+      setTimeout(function() {
+        console.log("После паузы");
+      }, 100)
+
       // Функция анимации
       function animate() {
         requestAnimationFrame(animate);
         renderer.render(scene, camera);
+        setTimeout(function() {
+          console.log("После паузы");
+        }, 100)
       }
 
       // Запускаем анимацию
@@ -69,10 +80,19 @@
     let index = 0;  // Индекс для отслеживания текущего аргумента
 
     // Функция, которая будет вызываться с некоторой частотой
-    setInterval(function() {
-      testAnimation(frames[index]);
-      index = (index + 1) % frames.length;
-    }, 250);
+    // setInterval(function() {
+    for (index = 203; index < 288; index++) {
+      testAnimation(`static/turbine frames/Анимация турбины_${index}.jpg`);
+      // index = (index + 1) % frames.length;
+      // index++;
+      console.log(index);
+      if (index == 288) {
+        index = 0;
+      }
+
+      console.log('конец функции')
+      // }, 200);
+    }
     
   </script>
 
