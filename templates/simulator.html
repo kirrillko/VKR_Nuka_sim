@@ -622,6 +622,7 @@
         <legend>Управление</legend>
         <button id="Start">Пуск</button>
         <button>Останов</button>
+        <button id="test">Тест</button>
     </fieldset>
     <fieldset>
         <legend>Небольшие инциденты</legend>
@@ -723,6 +724,7 @@ explainTask('Вы выбрали современный путь (без обу�
 // Основная функция
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, 600 / 400, 0.1, 1000);
+// camera.position.z = 5;
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(1400, 450);
 renderer.setClearColor(0xffffff);
@@ -1174,43 +1176,215 @@ function printRadBez() {
   }
 }
 
-function animateTurbine() {
-  // Основная сцена Three.js
-  // const scene = new THREE.Scene();
-  // const camera = new THREE.PerspectiveCamera(75, 600 / 400, 0.1, 1000);
-  // const renderer = new THREE.WebGLRenderer();
-  // renderer.setSize(600, 400);
-  // document.getElementById('three-container').appendChild(renderer.domElement);
-
-  // Загружаем GIF анимацию как текстуру
-  const textureLoader = new THREE.TextureLoader();
-  const gifTexture = textureLoader.load('static/vver/test_gif.gif');  // Укажите путь к вашему GIF
-
-  // Создаем материал для плоскости с GIF
-  const material = new THREE.MeshBasicMaterial({ map: gifTexture });
-
-  // Создаем геометрию плоскости
-  const geometry = new THREE.PlaneGeometry(4, 4);
-
-  // Создаем объект Mesh
-  const plane = new THREE.Mesh(geometry, material);
-  scene.add(plane);
-
-  // Камера
-  camera.position.z = 5;
-
-  // Функция анимации
-  function animate() {
-    requestAnimationFrame(animate);
-    gifTexture.needsUpdate = true;
-    renderer.render(scene, camera);
+function sleep(milliseconds) {
+  const start = Date.now();
+  while (Date.now() - start < milliseconds) {
+    // Просто ждем, пока не пройдет нужное количество времени
   }
-
-  // Запускаем анимацию
-  animate();
 }
 
+function animateTurbine() {
+  while (true) {
+      console.log('запущен цикл while')
+      // Загружаем текстуру (картинку)
+      const textureLoader = new THREE.TextureLoader();
+      const is_turbine = document.querySelector('input[name="teplo4"]:checked').value;
+      for (let i = 203; i <= 289; i++) {
+          let texture = textureLoader.load(`static/turbine frames/Анимация турбины_${i}.jpg`);
+          if (is_turbine=='tepl_turbine') {
+              console.log('запущен цикл for')
+              sleep(500);
+              // Создаем плоскость, на которую наложим текстуру
+              const geometry = new THREE.PlaneGeometry(1, 1);  // Размер плоскости
+              const material = new THREE.MeshBasicMaterial({ map: texture });
+              const plane = new THREE.Mesh(geometry, material);
 
+              // Устанавливаем позицию изображения на заданные координаты
+              plane.position.set(0, 0, zCoord);
+
+              // Добавляем плоскость в сцену
+              scene.add(plane);
+
+              // Камера
+              camera.position.z = 5;
+
+              renderer.render( scene, camera );
+
+              // Функция анимации для рендеринга
+              function animate() {
+                requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+              }
+              animate();
+          }
+      }
+  }
+}
+
+function testTurbine() {
+    // Загружаем текстуру (картинку)
+  const textureLoader = new THREE.TextureLoader();
+  const is_turbine = document.querySelector('input[name="teplo4"]:checked').value;
+  while (true) {
+      console.log('запущен цикл while')
+      for (let i = 203; i <= 289; i++) {
+          sleep(500);
+          console.log('запущен цикл for')
+          let texture = textureLoader.load('static/turbine frames/Анимация турбины_203.jpg');  // Укажите путь к вашему изображению
+          if (is_turbine=='tepl_turbine') {
+
+              // Создаем плоскость, на которую наложим текстуру
+              const geometry = new THREE.PlaneGeometry(1, 1);  // Размер плоскости
+              const material = new THREE.MeshBasicMaterial({ map: texture });
+              const plane = new THREE.Mesh(geometry, material);
+
+              // Устанавливаем позицию изображения на заданные координаты
+              plane.position.set(4, 0, zCoord);
+
+              // Добавляем плоскость в сцену
+              scene.add(plane);
+
+              // Камера
+              camera.position.z = 5;
+
+              renderer.render( scene, camera );
+
+              // Функция анимации для рендеринга
+              function animate() {
+                requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+              }
+              animate();
+          }
+      }
+  }
+}
+
+function testTurbine2() {
+    const textureLoader = new THREE.TextureLoader();
+    const is_turbine = document.querySelector('input[name="teplo4"]:checked').value;
+
+    // Массив для хранения текстур
+    const textures = [];
+
+    // Загружаем текстуры заранее
+    for (let i = 203; i <= 289; i++) {
+      const texture = textureLoader.load(`static/turbine frames/Анимация турбины_${i}.jpg`);
+      textures.push(texture);
+    }
+
+    // Создаем плоскость для отображения текстуры
+    const geometry = new THREE.PlaneGeometry(1, 1);
+    const material = new THREE.MeshBasicMaterial({ map: textures[0] }); // Начинаем с первой текстуры
+    const plane = new THREE.Mesh(geometry, material);
+    plane.position.set(4, 0, zCoord); // Устанавливаем позицию
+    scene.add(plane);
+
+    // Индекс текущей текстуры
+    let currentTextureIndex = 0;
+
+    // Функция анимации
+    function animate() {
+      requestAnimationFrame(animate);
+
+      // Обновляем текстуру каждые 500 мс
+      if (is_turbine === 'tepl_turbine') {
+        sleep(500);
+        currentTextureIndex = (currentTextureIndex + 1) % textures.length; // Переходим к следующей текстуре
+        material.map = textures[currentTextureIndex]; // Применяем новую текстуру
+        material.needsUpdate = true; // Указываем, что материал нужно обновить
+        console.log(`здесь обновляется текстура ${currentTextureIndex}`)
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    // Запускаем анимацию
+    animate();
+}
+
+function testTurbine3(i){
+    const textureLoader = new THREE.TextureLoader();
+  const is_turbine = document.querySelector('input[name="teplo4"]:checked').value;
+  let texture = textureLoader.load(`static/turbine frames/Анимация турбины_${i}.jpg`);  // Укажите путь к вашему изображению
+  if (is_turbine=='tepl_turbine') {
+      // Создаем плоскость, на которую наложим текстуру
+      const geometry = new THREE.PlaneGeometry(1, 1);  // Размер плоскости
+      const material = new THREE.MeshBasicMaterial({ map: texture });
+      const plane = new THREE.Mesh(geometry, material);
+
+      // Устанавливаем позицию изображения на заданные координаты
+      plane.position.set(4, 0, zCoord);
+
+      // Добавляем плоскость в сцену
+      scene.add(plane);
+
+      // Камера
+      camera.position.z = 5;
+
+      renderer.render( scene, camera );
+
+      // Функция анимации для рендеринга
+      function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+      animate();
+  }
+}
+
+function testTurbine4(){
+    // Загрузчик текстур
+    const textureLoader = new THREE.TextureLoader();
+
+    // Массив для хранения текстур
+    const textures = [];
+    for (let i = 203; i <= 289; i++) { // Предположим, у вас 10 текстур
+      const texture = textureLoader.load(`static/turbine frames/Анимация турбины_${i}.jpg`);
+      textures.push(texture);
+    }
+
+    // Создаем плоскость с начальной текстурой
+    const geometry = new THREE.PlaneGeometry(1, 1);
+    const material = new THREE.MeshBasicMaterial({ map: textures[0] });
+    const plane = new THREE.Mesh(geometry, material);
+    plane.position.set(4, 0, zCoord);
+    scene.add(plane);
+
+    // Позиционируем камеру
+    camera.position.z = 5;
+
+    // Индекс текущей текстуры
+    let currentTextureIndex = 0;
+
+    // Условие для анимации
+    let isAnimating = true;
+
+    // Функция анимации
+    function animate() {
+      if (!isAnimating) return; // Останавливаем анимацию, если условие не выполняется
+
+      requestAnimationFrame(animate);
+
+      // Меняем текстуру каждые 100 мс
+      setTimeout(() => {
+        currentTextureIndex = (currentTextureIndex + 1) % textures.length; // Переход к следующей текстуре
+        material.map = textures[currentTextureIndex]; // Применяем новую текстуру
+        material.needsUpdate = true; // Обновляем материал
+      }, 100);
+
+      renderer.render(scene, camera);
+    }
+
+    // Запускаем анимацию
+    animate();
+
+    // Пример условия для остановки анимации
+    // setTimeout(() => {
+    //   isAnimating = false; // Останавливаем анимацию через 10 секунд
+    //   console.log("Анимация остановлена");
+    // }, 10000); // 10 секунд
+}
 // Построение техники по нажатиям кнопок
 document.getElementById('loadTvel').addEventListener('click', function() {
   loadTvel();
@@ -1301,5 +1475,8 @@ document.getElementById('btnRadBez').addEventListener('click', function() {
 });
 document.getElementById('Start').addEventListener('click', function() {
   animateTurbine();
+});
+document.getElementById('test').addEventListener('click', function() {
+    testTurbine4()
 });
 </script>
