@@ -537,45 +537,45 @@
         <div>
             <img src="static\interface\sb_germo.png" style="height: 100px;">
         </div>   
-        <input type="checkbox" id="sb_germo" name="sb" value="sb_germo" />
+        <input type="checkbox" id="sb_germo" name="sb_1" value="sb_germo" />
         <label for="sb_germo">Гермооболочка</label>
     </div>
     <div>
         <div>
             <img src="static\interface\sb_suz.png" style="height: 100px;">
         </div>   
-        <input type="checkbox" id="sb_suz" name="sb" value="sb_suz" />
+        <input type="checkbox" id="sb_suz" name="sb_2" value="sb_suz" />
         <label for="sb_suz">Стержни СУЗ и АЗ</label>
     </div>
     <div>
         <div>
             <img src="static\interface\sb_ge.png" style="height: 100px;">
         </div>   
-        <input type="checkbox" id="sb_ge" name="sb" value="sb_ge" />
+        <input type="checkbox" id="sb_ge" name="sb_3" value="sb_ge" />
         <label for="sb_ge">Гидроёмкости охлаждения</label>
     </div>
     <div>
         <div>
             <img src="static\interface\sb_trap.png" style="height: 100px;">
         </div>   
-        <input type="checkbox" id="sb_trap" name="sb" value="sb_trap" />
+        <input type="checkbox" id="sb_trap" name="sb_4" value="sb_trap" />
         <label for="sb_trap">Ловушка расплава</label>
     </div>
     <div>
         <div>
             <img src="static\interface\sb_sprink.png" style="height: 100px;">
         </div>   
-        <input type="checkbox" id="sb_sprink" name="sb" value="sb_sprink" />
+        <input type="checkbox" id="sb_sprink" name="sb_5" value="sb_sprink" />
         <label for="sb_sprink">Спринклерная система</label>
     </div>
     <div>
         <div>
             <img src="static\interface\sb_sliv.png" style="height: 100px;">
         </div>   
-        <input type="checkbox" id="sb_sliv" name="sb" value="sb_sliv" />
+        <input type="checkbox" id="sb_sliv" name="sb_6" value="sb_sliv" />
         <label for="sb_sliv">Слив воды</label>
     </div>
-    <button>Построить</button>
+    <button id="btnSB">Построить</button>
 </div>
 
 <div id="tab7" class="tab-content">
@@ -1333,6 +1333,35 @@ function testTurbine3(i){
   }
 }
 
+function printElement(width, height, xCoord, yCoord, path) {
+  // Загружаем текстуру (картинку)
+  const textureLoader = new THREE.TextureLoader();
+  let texture = textureLoader.load(path);  // Укажите путь к вашему изображению
+
+  // Создаем плоскость, на которую наложим текстуру
+  const geometry = new THREE.PlaneGeometry(width, height);  // Размер плоскости
+  const material = new THREE.MeshBasicMaterial({ map: texture });
+  const plane = new THREE.Mesh(geometry, material);
+
+  // Устанавливаем позицию изображения на заданные координаты
+  plane.position.set(xCoord, yCoord, zCoord);
+
+  // Добавляем плоскость в сцену
+  scene.add(plane);
+
+  // Камера
+  camera.position.z = 5;
+
+  renderer.render( scene, camera );
+
+  // Функция анимации для рендеринга
+  function animate() {
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+  }
+  animate();
+}
+
 function testTurbine4(){
     // Загрузчик текстур
     const textureLoader = new THREE.TextureLoader();
@@ -1472,6 +1501,77 @@ document.getElementById('btnTeplo').addEventListener('click', function() {
 });
 document.getElementById('btnRadBez').addEventListener('click', function() {
   printRadBez();
+});
+document.getElementById('btnSB').addEventListener('click', function() {
+    let is_germo = 0;
+    try {
+        is_germo = document.querySelector('input[name="sb_1"]:checked').value;
+    }
+    catch(exceptionVar) {
+        is_germo = 0;
+    }
+
+    let is_suz = 0;
+    try {
+        is_suz = document.querySelector('input[name="sb_2"]:checked').value;
+    }
+    catch(exceptionVar) {
+        is_suz = 0;
+    }
+
+    let is_ge = 0;
+    try {
+        is_ge = document.querySelector('input[name="sb_3"]:checked').value;
+    }
+    catch(exceptionVar) {
+        is_ge = 0;
+    }
+
+    let is_lovushka = 0;
+    try {
+        is_lovushka = document.querySelector('input[name="sb_4"]:checked').value;
+    }
+    catch(exceptionVar) {
+        is_lovushka = 0;
+    }
+
+    let is_sprink = 0;
+    try {
+        is_sprink = document.querySelector('input[name="sb_5"]:checked').value;
+    }
+    catch(exceptionVar) {
+        is_sprink = 0;
+    }
+
+    let is_sliv = 0;
+    try {
+        is_sliv = document.querySelector('input[name="sb_6"]:checked').value;
+    }
+    catch(exceptionVar) {
+        is_sliv = 0;
+    }
+
+    if (is_sliv == 0 && is_suz !== 0) {
+        if (is_germo !== 0) {
+            printElement(3, 6.5, -2, 0.5, 'static/vver/germoobolochka.png');
+        }
+
+        if (is_lovushka !== 0) {
+            printElement(1, 1, -2, -3, 'static/vver/lovushka_empty.png');
+        }
+
+        if (is_ge !== 0) {
+            printElement(0.3, 2.5, -1.2, 1.5, 'static/vver/gidroemkost.png');
+        }
+
+        if (is_sprink !== 0) {
+            printElement(1, 0.2, -2, 3, 'static/vver/sprinkler.png');
+        }
+    } else {
+        errorAlert('Грубая ошибка в системах безопасности. Возможно, не хватает СУЗ или стоит убрать слив.')
+    }
+
+
 });
 document.getElementById('Start').addEventListener('click', function() {
   animateTurbine();
