@@ -34,7 +34,7 @@
         /* Стили для рабочей области */
         .work-area {
             width: 100%;
-            height: 450px;
+            height: 75%;
             background-color: #28a745; /* зелёный цвет */
             margin-bottom: 10px;
             display: flex;
@@ -42,6 +42,7 @@
             align-items: center;
             color: white;
             font-size: 24px;
+            padding-bottom: 10%;
         }
 
         /* Ползунок */
@@ -744,206 +745,288 @@ const reactor_yCoord = 0;
 const pg_xCoord = 1;
 const pg_yCoord = 0;
 
+// let isTvel = false;
+// let isTvs = false;
+// let isReactor = false;
+// let isPG = false;
+// let isTeplo = false;
+// let isSB = false;
+// let isRadBez = false;
+
+class AesStatusSystem {
+  constructor() {
+    this.isTvel = false;
+    this.isTvs = false;
+    this.isReactor = false;
+    this.isPG = false;
+    this.isTeplo = false;
+    this.isSB = false;
+    this.isRadBez = false;
+  }
+
+  activateSystem(systemName) {
+    if (this.hasOwnProperty(systemName)) {
+      this[systemName] = true;
+    } else {
+      console.warn(`Системы ${systemName} не существует!`);
+    }
+  }
+
+  isTvsTurn() {
+      return this.isTvel && !this.isTvs;
+  }
+
+  isReactorTurn() {
+      return this.isTvel && this.isTvs && !this.isReactor;
+  }
+
+  isPGTurn() {
+      return this.isTvel && this.isTvs && this.isReactor && !this.isPG;
+  }
+
+  isTeploTurn() {
+      return this.isTvel && this.isTvs && this.isReactor && this.isPG && !this.isTeplo;
+  }
+
+  isSBTurn() {
+      return this.isTvel && this.isTvs && this.isReactor && this.isPG && this.isTeplo && !this.isSB;
+  }
+
+  isRadBezTurn() {
+      return this.isTvel && this.isTvs && this.isReactor && this.isPG && this.isTeplo && this.isSB && !this.isRadBez;
+  }
+}
+
+let aesStatus = new AesStatusSystem();
+
 
 // Функция отрисовки твэла
 function loadTvel() {
-  // Загружаем текстуру (картинку)
-  const textureLoader = new THREE.TextureLoader();
-  const selectedValue = document.querySelector('input[name="tvel-form"]:checked').value;
-  let texture = textureLoader.load('static/vver/tvel_cyl.png');  // Укажите путь к вашему изображению 
-  if (selectedValue=='cyl') {
-    texture = textureLoader.load('static/vver/tvel_cyl.png');
-    } 
-  else {
-    texture = textureLoader.load('static/vver/tvel_krest.png');
+    if (!aesStatus.isTvel) {
+        // Загружаем текстуру (картинку)
+        const textureLoader = new THREE.TextureLoader();
+        const selectedValue = document.querySelector('input[name="tvel-form"]:checked').value;
+        let texture = textureLoader.load('static/vver/tvel_cyl.png');  // Укажите путь к вашему изображению
+        if (selectedValue=='cyl') {
+            texture = textureLoader.load('static/vver/tvel_cyl.png');
+        }
+        else {
+            texture = textureLoader.load('static/vver/tvel_krest.png');
+        }
+        const fuel = document.querySelector('input[name="fuel"]:checked').value;
+        const pd = document.querySelector('input[name="PD"]:checked').value;
+        // const case = document.querySelector('input[name="case"]:checked').value;
+        // const percentage = document.querySelector('input[class="slider"]:checked').value;
+        const percentage = document.getElementById('slider').value;
+        if ((fuel=='metu' || fuel=='uo2')  && (percentage>4 && percentage<20)) {
+          // Создаем плоскость, на которую наложим текстуру
+          const geometry = new THREE.PlaneGeometry(0.3, 5);  // Размер плоскости
+          const material = new THREE.MeshBasicMaterial({ map: texture });
+          const plane = new THREE.Mesh(geometry, material);
+
+          // Устанавливаем позицию изображения на заданные координаты
+          plane.position.set(xCoord, yCoord, zCoord);
+
+          // Добавляем плоскость в сцену
+          scene.add(plane);
+
+          // Камера
+          camera.position.z = 5;
+
+          // Функция анимации для рендеринга
+          function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+          }
+          animate();
+
+          aesStatus.activateSystem('isTvel');
+        } else {
+            errorAlert('Ваш твэл не соответствует пути. Возможно, ваше обогащение не соответствует нормам МАГАТЭ для гражданской техники. Или вы выбрали топливо, которого нет в вашей стране.');
+        }
     }
-  const fuel = document.querySelector('input[name="fuel"]:checked').value;
-  const pd = document.querySelector('input[name="PD"]:checked').value;
-  // const case = document.querySelector('input[name="case"]:checked').value;
-  // const percentage = document.querySelector('input[class="slider"]:checked').value;
-  const percentage = document.getElementById('slider').value;
-  if ((fuel=='metu'||fuel=='uo2')  && (percentage>4 && percentage<20)) {
-      // Создаем плоскость, на которую наложим текстуру
-      const geometry = new THREE.PlaneGeometry(0.3, 5);  // Размер плоскости
-      const material = new THREE.MeshBasicMaterial({ map: texture });
-      const plane = new THREE.Mesh(geometry, material);
-
-      // Устанавливаем позицию изображения на заданные координаты
-      plane.position.set(xCoord, yCoord, zCoord);
-
-      // Добавляем плоскость в сцену
-      scene.add(plane);
-
-      // Камера
-      camera.position.z = 5;
-
-      // Функция анимации для рендеринга
-      function animate() {
-        requestAnimationFrame(animate);
-        renderer.render(scene, camera);
-      }
-      animate();
-  } else {
-    errorAlert('Ваш твэл не соответствует пути. Возможно, ваше обогащение не соответствует нормам МАГАТЭ для гражданской техники. Или вы выбрали топливо, которого нет в вашей стране.');
-  }
-  
+    else {
+        errorAlert('Твэл уже сконструирован.')
+    }
 }
 
 function printTVS() {
-  // Загружаем текстуру (картинку)
-  const textureLoader = new THREE.TextureLoader();
-  const selectedValue = document.querySelector('input[name="tvs-form"]:checked').value;
-  let texture = textureLoader.load('static/vver/tvs_six.png');  // Укажите путь к вашему изображению 
-  if (selectedValue=='six') {
-    texture = textureLoader.load('static/vver/tvs_six.png');
-    } 
-  else {
-    texture = textureLoader.load('static/vver/tvs_square.png');
+    if (aesStatus.isTvsTurn()) {
+        // Загружаем текстуру (картинку)
+        const textureLoader = new THREE.TextureLoader();
+        const selectedValue = document.querySelector('input[name="tvs-form"]:checked').value;
+        let texture = textureLoader.load('static/vver/tvs_six.png');  // Укажите путь к вашему изображению
+        if (selectedValue=='six') {
+            texture = textureLoader.load('static/vver/tvs_six.png');
+        }
+        else {
+            texture = textureLoader.load('static/vver/tvs_square.png');
+        }
+        const zamedl = document.querySelector('input[name="zamedl"]:checked').value;
+        const cooler = document.querySelector('input[name="cooler"]:checked').value;
+        const dist = document.querySelector('input[name="dist"]:checked').value;
+
+        if (zamedl=='water' && cooler=='water_cooler' && dist=='dist_yes') {
+        // Создаем плоскость, на которую наложим текстуру
+          const geometry = new THREE.PlaneGeometry(0.3, 5);
+          const material = new THREE.MeshBasicMaterial({ map: texture });
+          const plane = new THREE.Mesh(geometry, material);
+
+          // Устанавливаем позицию изображения на заданные координаты
+          plane.position.set(tvs_xCoord, tvs_yCoord, zCoord);
+
+          // Добавляем плоскость в сцену
+          scene.add(plane);
+
+          // Камера
+          camera.position.z = 5;
+
+          // Функция анимации для рендеринга
+          function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+          }
+          animate();
+
+          aesStatus.activateSystem('isTvs')
+        }
+        else {
+            errorAlert('Ваша ТВС несовместима с выбранным путём. Возможно, вы выбрали неправильный замедлитель, теплоноситель или отсутсвуют дистанционирующие решётки.')
+        }
     }
-  const zamedl = document.querySelector('input[name="zamedl"]:checked').value;
-  const cooler = document.querySelector('input[name="cooler"]:checked').value;
-  const dist = document.querySelector('input[name="dist"]:checked').value;
-
-  if (zamedl=='water' && cooler=='water_cooler' && dist=='dist_yes') {
-    // Создаем плоскость, на которую наложим текстуру
-      const geometry = new THREE.PlaneGeometry(0.3, 5);
-      const material = new THREE.MeshBasicMaterial({ map: texture });
-      const plane = new THREE.Mesh(geometry, material);
-
-      // Устанавливаем позицию изображения на заданные координаты
-      plane.position.set(tvs_xCoord, tvs_yCoord, zCoord);
-
-      // Добавляем плоскость в сцену
-      scene.add(plane);
-
-      // Камера
-      camera.position.z = 5;
-
-      // Функция анимации для рендеринга
-      function animate() {
-        requestAnimationFrame(animate);
-        renderer.render(scene, camera);
-      }
-      animate();
-  }
-  else {
-    errorAlert('Ваша ТВС несовместима с выбранным путём. Возможно, вы выбрали неправильный замедлитель, теплоноситель или отсутсвуют дистанционирующие решётки.')
-  }
-  
+    else {
+        errorAlert('Сейчас не время конструировать ТВС. Либо вы ещё не сделали твэл, либо ТВС уже есть.')
+    }
 }
 
-function printReactor() {
-  // Загружаем текстуру (картинку)
-  const textureLoader = new THREE.TextureLoader();
-  const selectedValue = document.querySelector('input[name="reactor-form"]:checked').value;
-  // const count_loops = document.querySelector('input[name="reactor-form"]:checked').value;
-  const count_loops = document.querySelector('select[name="count_loops"]').value;
-  let texture = textureLoader.load('static/vver/reactor_vver.jpg');  // Укажите путь к вашему изображению 
-  if (selectedValue=='loop' && count_loops > 2) {
-  // Создаем плоскость, на которую наложим текстуру
-  const geometry = new THREE.PlaneGeometry(0.75, 4);  // Размер плоскости
-  const material = new THREE.MeshBasicMaterial({ map: texture });
-  const plane = new THREE.Mesh(geometry, material);
+function printReactor(repeat=false) {
+    if (aesStatus.isReactorTurn() || repeat == true) {
+        // Загружаем текстуру (картинку)
+        const textureLoader = new THREE.TextureLoader();
+        const selectedValue = document.querySelector('input[name="reactor-form"]:checked').value;
+        // const count_loops = document.querySelector('input[name="reactor-form"]:checked').value;
+        const count_loops = document.querySelector('select[name="count_loops"]').value;
+        let texture = textureLoader.load('static/vver/reactor_vver.jpg');  // Укажите путь к вашему изображению
+        if (selectedValue == 'loop' && count_loops > 2) {
+            // Создаем плоскость, на которую наложим текстуру
+            const geometry = new THREE.PlaneGeometry(0.75, 4);  // Размер плоскости
+            const material = new THREE.MeshBasicMaterial({map: texture});
+            const plane = new THREE.Mesh(geometry, material);
 
-  // Устанавливаем позицию изображения на заданные координаты
-  plane.position.set(reactor_xCoord, reactor_yCoord, zCoord);
+            // Устанавливаем позицию изображения на заданные координаты
+            plane.position.set(reactor_xCoord, reactor_yCoord, zCoord);
 
-  // Добавляем плоскость в сцену
-  scene.add(plane);
+            // Добавляем плоскость в сцену
+            scene.add(plane);
 
-  // Камера
-  camera.position.z = 5;
+            // Камера
+            camera.position.z = 5;
 
-  //рисуем трубопровод
-    const pipe_material = new THREE.LineBasicMaterial( 
-        { color: 0x1a1a1a, 
-          linewidth: 50,
-          linecap: 'round'
-        } );
+            //рисуем трубопровод
+            const pipe_material = new THREE.LineBasicMaterial(
+                {
+                    color: 0x1a1a1a,
+                    linewidth: 50,
+                    linecap: 'round'
+                });
 
-    const points = [];
-    points.push( new THREE.Vector3( -1.75, 0, 0 ) );
-    points.push( new THREE.Vector3( -1, 0, 0 ) );
-    points.push( new THREE.Vector3( -1, 1, 0 ) );
-    points.push( new THREE.Vector3( 1, 1, 0 ) );
-    points.push( new THREE.Vector3( 1, -1.5, 0 ) );
-    points.push( new THREE.Vector3( -1, -1.5, 0 ) );
-    points.push( new THREE.Vector3( -1, -0.4, 0 ) );
-    points.push( new THREE.Vector3( -1.75, -0.4, 0 ) );
+            const points = [];
+            points.push(new THREE.Vector3(-1.75, 0, 0));
+            points.push(new THREE.Vector3(-1, 0, 0));
+            points.push(new THREE.Vector3(-1, 1, 0));
+            points.push(new THREE.Vector3(1, 1, 0));
+            points.push(new THREE.Vector3(1, -1.5, 0));
+            points.push(new THREE.Vector3(-1, -1.5, 0));
+            points.push(new THREE.Vector3(-1, -0.4, 0));
+            points.push(new THREE.Vector3(-1.75, -0.4, 0));
 
-    const pipe_geometry = new THREE.BufferGeometry().setFromPoints( points );
+            const pipe_geometry = new THREE.BufferGeometry().setFromPoints(points);
 
-    const pipe = new THREE.Line( pipe_geometry, pipe_material );
+            const pipe = new THREE.Line(pipe_geometry, pipe_material);
 
-    scene.add(pipe);
-    renderer.render( scene, camera );
+            scene.add(pipe);
+            renderer.render(scene, camera);
 
-  // Функция анимации для рендеринга
-  function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
-  }
-  animate();
-} else {
-    errorAlert("Вы выбрали неправильную компоновку или количество петель.")
+            // Функция анимации для рендеринга
+            function animate() {
+                requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+            }
+
+            animate();
+
+            aesStatus.activateSystem('isReactor');
+        } else {
+            errorAlert("Вы выбрали неправильную компоновку или количество петель.")
+        }
+    } else {
+        errorAlert('Сейчас не время конструировать реактор. Возможно, он уже сконструирован. Или нет его внутренностей (твэл, твс).')
+    }
 }
-}
+
 
 function printPG() {
-  // Загружаем текстуру (картинку)
-  const textureLoader = new THREE.TextureLoader();
-  const is_pg_dist = document.querySelector('input[name="is_pg_dist"]:checked').value;
-  let texture = textureLoader.load('static/vver/pg_vver.png');  // Укажите путь к вашему изображению 
-  if (is_pg_dist=='pg_dist_yes') {
+    if (aesStatus.isPGTurn()) {
+        // Загружаем текстуру (картинку)
+        const textureLoader = new THREE.TextureLoader();
+        const is_pg_dist = document.querySelector('input[name="is_pg_dist"]:checked').value;
+        let texture = textureLoader.load('static/vver/pg_vver.png');  // Укажите путь к вашему изображению
+        if (is_pg_dist=='pg_dist_yes') {
 
-      // Создаем плоскость, на которую наложим текстуру
-      const geometry = new THREE.PlaneGeometry(1.5, 1.2);  // Размер плоскости
-      const material = new THREE.MeshBasicMaterial({ map: texture });
-      const plane = new THREE.Mesh(geometry, material);
+          // Создаем плоскость, на которую наложим текстуру
+          const geometry = new THREE.PlaneGeometry(1.5, 1.2);  // Размер плоскости
+          const material = new THREE.MeshBasicMaterial({ map: texture });
+          const plane = new THREE.Mesh(geometry, material);
 
-      // Устанавливаем позицию изображения на заданные координаты
-      plane.position.set(pg_xCoord, pg_yCoord, zCoord);
+          // Устанавливаем позицию изображения на заданные координаты
+          plane.position.set(pg_xCoord, pg_yCoord, zCoord);
 
-      // Добавляем плоскость в сцену
-      scene.add(plane);
+          // Добавляем плоскость в сцену
+          scene.add(plane);
 
-      // Камера
-      camera.position.z = 5;
+          // Камера
+          camera.position.z = 5;
 
-      //рисуем трубопровод
-        const pipe_material = new THREE.LineBasicMaterial( 
-            { color: 0x1a1a1a, 
-              linewidth: 10,
-              linecap: 'round'
-            } );
+          //рисуем трубопровод
+            const pipe_material = new THREE.LineBasicMaterial(
+                { color: 0x1a1a1a,
+                  linewidth: 10,
+                  linecap: 'round'
+                } );
 
-        const points = [];
+            const points = [];
 
-        points.push( new THREE.Vector3( 1.5, 0.6, 0 ) );
-        points.push( new THREE.Vector3( 1.5, 1, 0 ) );
-        points.push( new THREE.Vector3( 4, 1, 0 ) );
-        points.push( new THREE.Vector3( 4, -2, 0 ) );
-        points.push( new THREE.Vector3( 1.5, -2, 0 ) );
-        points.push( new THREE.Vector3( 1.5, -0.5, 0 ) );
+            points.push( new THREE.Vector3( 1.5, 0.6, 0 ) );
+            points.push( new THREE.Vector3( 1.5, 1, 0 ) );
+            points.push( new THREE.Vector3( 4, 1, 0 ) );
+            points.push( new THREE.Vector3( 4, -2, 0 ) );
+            points.push( new THREE.Vector3( 1.5, -2, 0 ) );
+            points.push( new THREE.Vector3( 1.5, -0.5, 0 ) );
 
 
-        const pipe_geometry = new THREE.BufferGeometry().setFromPoints( points );
+            const pipe_geometry = new THREE.BufferGeometry().setFromPoints( points );
 
-        const pipe = new THREE.Line( pipe_geometry, pipe_material );
+            const pipe = new THREE.Line( pipe_geometry, pipe_material );
 
-        scene.add(pipe);
-        renderer.render( scene, camera );
+            scene.add(pipe);
+            renderer.render( scene, camera );
 
-      // Функция анимации для рендеринга
-      function animate() {
-        requestAnimationFrame(animate);
-        renderer.render(scene, camera);
-      }
-      animate();
-  }
-  else {
-    errorAlert('Не хватает дистанционирующих решёток для трубочек парогенератора.')
-  }
+          // Функция анимации для рендеринга
+          function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+          }
+          animate();
+
+          aesStatus.activateSystem('isPG');
+        }
+        else {
+            errorAlert('Не хватает дистанционирующих решёток для трубочек парогенератора.')
+        }
+    } else {
+        errorAlert('Сейчас не время конструировать парогенератор. Либо он уже есть, либо не хватает чего-то из I контура (твэл, твс, реактор).')
+    }
+
 }
 
 function printGZN() {
@@ -978,37 +1061,37 @@ function printGZN() {
   }
 }
 
-function printPitNasos() {
-  // Загружаем текстуру (картинку)
-  const textureLoader = new THREE.TextureLoader();
-  const is_pit_nasos = document.querySelector('input[name="teplo2"]:checked').value;
-  let texture = textureLoader.load('static/vver/pit_nasos.jpg');  // Укажите путь к вашему изображению 
-  if (is_pit_nasos=='tepl_nasos') {
-
-      // Создаем плоскость, на которую наложим текстуру
-      const geometry = new THREE.PlaneGeometry(1, 1);  // Размер плоскости
-      const material = new THREE.MeshBasicMaterial({ map: texture });
-      const plane = new THREE.Mesh(geometry, material);
-
-      // Устанавливаем позицию изображения на заданные координаты
-      plane.position.set(3, -2, zCoord);
-
-      // Добавляем плоскость в сцену
-      scene.add(plane);
-
-      // Камера
-      camera.position.z = 5;
-
-      renderer.render( scene, camera );
-
-      // Функция анимации для рендеринга
-      function animate() {
-        requestAnimationFrame(animate);
-        renderer.render(scene, camera);
-      }
-      animate();
-  }
-}
+// function printPitNasos() {
+//   // Загружаем текстуру (картинку)
+//   const textureLoader = new THREE.TextureLoader();
+//   const is_pit_nasos = document.querySelector('input[name="teplo2"]:checked').value;
+//   let texture = textureLoader.load('static/vver/pit_nasos.jpg');  // Укажите путь к вашему изображению
+//   if (is_pit_nasos=='tepl_nasos') {
+//
+//       // Создаем плоскость, на которую наложим текстуру
+//       const geometry = new THREE.PlaneGeometry(1, 1);  // Размер плоскости
+//       const material = new THREE.MeshBasicMaterial({ map: texture });
+//       const plane = new THREE.Mesh(geometry, material);
+//
+//       // Устанавливаем позицию изображения на заданные координаты
+//       plane.position.set(3, -2, zCoord);
+//
+//       // Добавляем плоскость в сцену
+//       scene.add(plane);
+//
+//       // Камера
+//       camera.position.z = 5;
+//
+//       renderer.render( scene, camera );
+//
+//       // Функция анимации для рендеринга
+//       function animate() {
+//         requestAnimationFrame(animate);
+//         renderer.render(scene, camera);
+//       }
+//       animate();
+//   }
+// }
 
 function printPitNasos() {
   // Загружаем текстуру (картинку)
@@ -1107,73 +1190,78 @@ function printCondensator() {
 }
 
 function printRadBez() {
-  let is_beton = 0;
-  try {
-    is_beton = document.querySelector('input[name="rb1"]:checked').value;
-  }
-  catch(exceptionVar) {
-    is_beton = 0;
-  }
+    if (aesStatus.isRadBezTurn()) {
+        let is_beton = 0;
+        try {
+            is_beton = document.querySelector('input[name="rb1"]:checked').value;
+        }
+        catch(exceptionVar) {
+            is_beton = 0;
+        }
 
-  let is_lead = 0;
-  try {
-    is_lead = document.querySelector('input[name="rb2"]:checked').value;
-  }
-  catch(exceptionVar) {
-    is_lead = 0;
-  }
+        let is_lead = 0;
+        try {
+            is_lead = document.querySelector('input[name="rb2"]:checked').value;
+        }
+        catch(exceptionVar) {
+            is_lead = 0;
+        }
 
-  let is_wood = 0;
-  try {
-    is_wood = document.querySelector('input[name="rb3"]:checked').value;
-  }
-  catch(exceptionVar) {
-    is_wood = 0;
-  }
+        let is_wood = 0;
+        try {
+            is_wood = document.querySelector('input[name="rb3"]:checked').value;
+        }
+        catch(exceptionVar) {
+            is_wood = 0;
+        }
 
-  let is_sand = 0;
-  try {
-    is_sand = document.querySelector('input[name="rb4"]:checked').value;
-  }
-  catch(exceptionVar) {
-    is_sand = 0;
-  }
+        let is_sand = 0;
+        try {
+            is_sand = document.querySelector('input[name="rb4"]:checked').value;
+        }
+        catch(exceptionVar) {
+            is_sand = 0;
+        }
 
-  const textureLoader = new THREE.TextureLoader();
-  let texture = textureLoader.load('static/vver/beton.png');  // Укажите путь к вашему изображению 
-  console.log(is_beton, is_lead, is_wood, is_sand);
-  if ((is_beton == 'rb_conc' || is_lead == 'rb_lead') && (is_wood == 0 && is_sand == 0)) {
+        const textureLoader = new THREE.TextureLoader();
+        let texture = textureLoader.load('static/vver/beton.png');  // Укажите путь к вашему изображению
+        console.log(is_beton, is_lead, is_wood, is_sand);
+        if ((is_beton == 'rb_conc' || is_lead == 'rb_lead') && (is_wood == 0 && is_sand == 0)) {
 
-      // Создаем плоскость, на которую наложим текстуру
-      const geometry = new THREE.PlaneGeometry(0.25, 1.5);  // Размер плоскости
-      const material = new THREE.MeshBasicMaterial({ map: texture });
-      const plane = new THREE.Mesh(geometry, material);
-      const plane2 = new THREE.Mesh(geometry, material);
+            // Создаем плоскость, на которую наложим текстуру
+            const geometry = new THREE.PlaneGeometry(0.25, 1.5);  // Размер плоскости
+            const material = new THREE.MeshBasicMaterial({ map: texture });
+            const plane = new THREE.Mesh(geometry, material);
+            const plane2 = new THREE.Mesh(geometry, material);
 
-      // Устанавливаем позицию изображения на заданные координаты
-      plane.position.set(-1.5, -1.25, zCoord);
-      plane2.position.set(-2.6, -1.25, zCoord);
+            // Устанавливаем позицию изображения на заданные координаты
+            plane.position.set(-1.5, -1.25, zCoord);
+            plane2.position.set(-2.6, -1.25, zCoord);
 
-      // Добавляем плоскость в сцену
-      scene.add(plane);
-      scene.add(plane2);
+            // Добавляем плоскость в сцену
+            scene.add(plane);
+            scene.add(plane2);
 
-      // Камера
-      camera.position.z = 5;
+            // Камера
+            camera.position.z = 5;
 
-      renderer.render( scene, camera );
+            renderer.render( scene, camera );
 
-      // Функция анимации для рендеринга
-      function animate() {
-        requestAnimationFrame(animate);
-        renderer.render(scene, camera);
-      }
-      animate();
-  }
-
-  else {
-    errorAlert('Выбраны неправильные материалы для биологической защиты. Персонал АЭС откажется работать.')
-  }
+            // Функция анимации для рендеринга
+            function animate() {
+                requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+            }
+            animate();
+            // isRadBez = true;
+            aesStatus.activateSystem('isRadBez');
+        }
+        else {
+            errorAlert('Выбраны неправильные материалы для биологической защиты. Персонал АЭС откажется работать.')
+        }
+    } else {
+        errorAlert('Сейчас не время проектировать биологическую защиту. Её нужно строить в последнюю очередь перед эксплуатацией. Или она уже есть.')
+    }
 }
 
 function sleep(milliseconds) {
@@ -1368,7 +1456,7 @@ function testTurbine4(){
 
     // Массив для хранения текстур
     const textures = [];
-    for (let i = 203; i <= 289; i++) { // Предположим, у вас 10 текстур
+    for (let i = 202; i <= 289; i++) { // Предположим, у вас 10 текстур
       const texture = textureLoader.load(`static/turbine frames/Анимация турбины_${i}.jpg`);
       textures.push(texture);
     }
@@ -1414,7 +1502,132 @@ function testTurbine4(){
     //   console.log("Анимация остановлена");
     // }, 10000); // 10 секунд
 }
+
+// function animateWork(){
+//     // Загрузчик текстур
+//     const textureLoader = new THREE.TextureLoader();
+//
+//     // Массив для хранения текстур
+//     const textures = [];
+//     for (let i = 1; i <= 3; i++) {
+//       const texture = textureLoader.load(`static/accidents_vver/Анимация запуска ${i}.png`);
+//       textures.push(texture);
+//     }
+//
+//     // Создаем плоскость с начальной текстурой
+//     const geometry = new THREE.PlaneGeometry(3, 7);
+//     const material = new THREE.MeshBasicMaterial({ map: textures[0] });
+//     const plane = new THREE.Mesh(geometry, material);
+//     plane.position.set(-2, 0.2, zCoord);
+//     scene.add(plane);
+//
+//     // Позиционируем камеру
+//     camera.position.z = 5;
+//
+//     // Индекс текущей текстуры
+//     let currentTextureIndex = 0;
+//
+//     // Условие для анимации
+//     let isAnimating = true;
+//
+//     // Функция анимации
+//     function animate() {
+//       if (!isAnimating) return; // Останавливаем анимацию, если условие не выполняется
+//
+//       requestAnimationFrame(animate);
+//
+//       // Меняем текстуру каждые ?? мс
+//       setTimeout(() => {
+//         currentTextureIndex = (currentTextureIndex + 1) % textures.length; // Переход к следующей текстуре
+//         material.map = textures[currentTextureIndex]; // Применяем новую текстуру
+//         material.needsUpdate = true; // Обновляем материал
+//       }, 5000);
+//
+//       renderer.render(scene, camera);
+//     }
+//
+//     // Запускаем анимацию
+//     animate();
+//
+//     // Пример условия для остановки анимации
+//     setTimeout(() => {
+//       isAnimating = false; // Останавливаем анимацию через ?? секунд
+//       console.log("Анимация остановлена");
+//     }, 10000); // ?? миллисекунд
+// }
 // Построение техники по нажатиям кнопок
+function animateWork() {
+    const textureLoader = new THREE.TextureLoader();
+    const textures = [];
+    const texturePromises = [];
+
+    // Асинхронная загрузка текстур
+    for (let i = 1; i <= 3; i++) {
+        texturePromises.push(new Promise(resolve => {
+            textureLoader.load(
+                `static/accidents_vver/Анимация запуска ${i}.png`,
+                texture => {
+                    textures.push(texture);
+                    resolve();
+                },
+                undefined,
+                error => console.error('Error loading texture:', error)
+            );
+        }));
+    }
+
+    Promise.all(texturePromises).then(() => {
+        if (textures.length === 0) return;
+
+        const geometry = new THREE.PlaneGeometry(3, 7);
+        const material = new THREE.MeshBasicMaterial({
+            map: textures[0],
+            transparent: true
+        });
+        const plane = new THREE.Mesh(geometry, material);
+        plane.position.set(-2, 0.2, zCoord);
+        scene.add(plane);
+
+        camera.position.z = 5;
+
+        let currentTextureIndex = 0;
+        let lastChangeTime = 0;
+        const frameInterval = 500; // ?? секунд между кадрами
+        let animationId;
+
+        function animate(timestamp) {
+            animationId = requestAnimationFrame(animate);
+
+            // Первый кадр - инициализация времени
+            if (lastChangeTime === 0) lastChangeTime = timestamp;
+
+            // Проверяем интервал между кадрами
+            const elapsed = timestamp - lastChangeTime;
+
+            if (elapsed >= frameInterval) {
+                lastChangeTime = timestamp;
+                currentTextureIndex = (currentTextureIndex + 1) % textures.length;
+                material.map = textures[currentTextureIndex];
+                material.needsUpdate = true;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // Запуск анимации
+        animationId = requestAnimationFrame(animate);
+
+        // Остановка через 10 секунд
+        setTimeout(() => {
+            cancelAnimationFrame(animationId);
+            scene.remove(plane);
+            geometry.dispose();
+            material.dispose();
+            textures.forEach(t => t.dispose());
+            console.log("Анимация завершена");
+        }, 10000);
+    });
+}
 document.getElementById('loadTvel').addEventListener('click', function() {
   loadTvel();
 });
@@ -1428,153 +1641,164 @@ document.getElementById('pgBtn').addEventListener('click', function() {
   printPG();
 });
 document.getElementById('btnTeplo').addEventListener('click', function() {
-  let is_gzn = 0;
-  try {
-    is_gzn = document.querySelector('input[name="teplo"]:checked').value;
-  }
-  catch(exceptionVar) {
-    is_gzn = 0;
-  }
+    if (aesStatus.isTeploTurn()) {
+        let is_gzn = 0;
+        try {
+            is_gzn = document.querySelector('input[name="teplo"]:checked').value;
+        }
+        catch(exceptionVar) {
+            is_gzn = 0;
+        }
 
-  let is_pit_nasos = 0;
-  try {
-    is_pit_nasos = document.querySelector('input[name="teplo2"]:checked').value;
-  }
-  catch(exceptionVar) {
-    is_pit_nasos = 0;
-  }
+        let is_pit_nasos = 0;
+        try {
+            is_pit_nasos = document.querySelector('input[name="teplo2"]:checked').value;
+        }
+        catch(exceptionVar) {
+            is_pit_nasos = 0;
+        }
 
-  let is_elmag = 0;
-  try {
-    is_elmag = document.querySelector('input[name="teplo3"]:checked').value;
-  }
-  catch(exceptionVar) {
-    is_elmag = 0;
-  }
+        let is_elmag = 0;
+        try {
+            is_elmag = document.querySelector('input[name="teplo3"]:checked').value;
+        }
+        catch(exceptionVar) {
+            is_elmag = 0;
+        }
 
-  let is_turbine = 0;
-  try {
-    is_turbine = document.querySelector('input[name="teplo4"]:checked').value;
-  }
-  catch(exceptionVar) {
-    is_turbine = 0;
-  }
+        let is_turbine = 0;
+        try {
+            is_turbine = document.querySelector('input[name="teplo4"]:checked').value;
+        }
+        catch(exceptionVar) {
+            is_turbine = 0;
+        }
 
-  let is_condensator = 0;
-  try {
-    is_condensator = document.querySelector('input[name="teplo5"]:checked').value;
-  }
-  catch(exceptionVar) {
-    is_condensator = 0;
-  }
-  // console.log(is_gzn, is_pit_nasos, is_elmag, is_turbine, is_condensator);
-  if (
-    (is_elmag == 0) &&
-    (is_gzn == 'tepl_gzn' && is_pit_nasos == 'tepl_nasos' && is_turbine == 'tepl_turbine' && is_condensator == 'tepl_cond')
-  ) 
-  {
-    try {
-      printGZN();
+        let is_condensator = 0;
+        try {
+            is_condensator = document.querySelector('input[name="teplo5"]:checked').value;
+        }
+        catch(exceptionVar) {
+            is_condensator = 0;
+        }
+        // console.log(is_gzn, is_pit_nasos, is_elmag, is_turbine, is_condensator);
+        if (
+            (is_elmag == 0) &&
+            (is_gzn == 'tepl_gzn' && is_pit_nasos == 'tepl_nasos' && is_turbine == 'tepl_turbine' && is_condensator == 'tepl_cond')
+        )
+        {
+            try {
+                printGZN();
+            } catch (exceptionVar) {}
+            try {
+                printPitNasos();
+            } catch (exceptionVar) {}
+            try {
+                printTurbine();
+            } catch (exceptionVar) {}
+            try {
+                printCondensator();
+            } catch (exceptionVar) {}
+
+            aesStatus.activateSystem('isTeplo');
+        }
+        else {
+            errorAlert('Неправильный набор теплотехники для этой установки.')
+        }
+    } else {
+        errorAlert('Сейчас не время подключать теплотехнику. Либо она уже есть, либо сперва сконструируйте основное оборудование (реактор и его внутренности, парогенератор).')
     }
-      catch (exceptionVar) {
-    }
-    try {
-      printPitNasos();
-    }
-    catch(exceptionVar) {
-    }
-    try {
-      printTurbine();
-    }
-    catch (exceptionVar) {
-    }
-    try {
-      printCondensator();
-    }
-    catch (exceptionVar){
-    }
-  }
-  else {
-    errorAlert('Неправильный набор теплотехники для этой установки.')
-  }
-  
 });
 document.getElementById('btnRadBez').addEventListener('click', function() {
   printRadBez();
 });
 document.getElementById('btnSB').addEventListener('click', function() {
-    let is_germo = 0;
-    try {
-        is_germo = document.querySelector('input[name="sb_1"]:checked').value;
-    }
-    catch(exceptionVar) {
-        is_germo = 0;
-    }
-
-    let is_suz = 0;
-    try {
-        is_suz = document.querySelector('input[name="sb_2"]:checked').value;
-    }
-    catch(exceptionVar) {
-        is_suz = 0;
-    }
-
-    let is_ge = 0;
-    try {
-        is_ge = document.querySelector('input[name="sb_3"]:checked').value;
-    }
-    catch(exceptionVar) {
-        is_ge = 0;
-    }
-
-    let is_lovushka = 0;
-    try {
-        is_lovushka = document.querySelector('input[name="sb_4"]:checked').value;
-    }
-    catch(exceptionVar) {
-        is_lovushka = 0;
-    }
-
-    let is_sprink = 0;
-    try {
-        is_sprink = document.querySelector('input[name="sb_5"]:checked').value;
-    }
-    catch(exceptionVar) {
-        is_sprink = 0;
-    }
-
-    let is_sliv = 0;
-    try {
-        is_sliv = document.querySelector('input[name="sb_6"]:checked').value;
-    }
-    catch(exceptionVar) {
-        is_sliv = 0;
-    }
-
-    if (is_sliv == 0 && is_suz !== 0) {
-        if (is_germo !== 0) {
-            printElement(3, 6.5, -2, 0.5, 'static/vver/germoobolochka.png');
+    if (aesStatus.isSBTurn()) {
+        let is_germo = 0;
+        try {
+            is_germo = document.querySelector('input[name="sb_1"]:checked').value;
+        }
+        catch(exceptionVar) {
+            is_germo = 0;
         }
 
-        if (is_lovushka !== 0) {
-            printElement(1, 1, -2, -3, 'static/vver/lovushka_empty.png');
+        let is_suz = 0;
+        try {
+            is_suz = document.querySelector('input[name="sb_2"]:checked').value;
+        }
+        catch(exceptionVar) {
+            is_suz = 0;
         }
 
-        if (is_ge !== 0) {
-            printElement(0.3, 2.5, -1.2, 1.5, 'static/vver/gidroemkost.png');
+        let is_ge = 0;
+        try {
+            is_ge = document.querySelector('input[name="sb_3"]:checked').value;
+        }
+        catch(exceptionVar) {
+            is_ge = 0;
         }
 
-        if (is_sprink !== 0) {
-            printElement(1, 0.2, -2, 3, 'static/vver/sprinkler.png');
+        let is_lovushka = 0;
+        try {
+            is_lovushka = document.querySelector('input[name="sb_4"]:checked').value;
+        }
+        catch(exceptionVar) {
+            is_lovushka = 0;
+        }
+
+        let is_sprink = 0;
+        try {
+            is_sprink = document.querySelector('input[name="sb_5"]:checked').value;
+        }
+        catch(exceptionVar) {
+            is_sprink = 0;
+        }
+
+        let is_sliv = 0;
+        try {
+            is_sliv = document.querySelector('input[name="sb_6"]:checked').value;
+        }
+        catch(exceptionVar) {
+            is_sliv = 0;
+        }
+
+        if (is_sliv == 0 && is_suz !== 0) {
+            if (is_germo !== 0) {
+                printElement(3, 6.5, -2, 0.5, 'static/vver/germoobolochka.png');
+            }
+
+            if (is_lovushka !== 0) {
+                printElement(1, 1, -2, -3, 'static/vver/lovushka_empty.png');
+            }
+
+            if (is_ge !== 0) {
+                printElement(0.3, 2.5, -1.2, 1.5, 'static/vver/gidroemkost.png');
+            }
+
+            if (is_sprink !== 0) {
+                printElement(1, 0.2, -2, 3, 'static/vver/sprinkler.png');
+            }
+
+            aesStatus.activateSystem('isSB');
+
+            // строим реактор поверх систем безопасности
+            // printElement(0.75, 4, reactor_xCoord, reactor_yCoord, 'static/vver/reactor_vver.jpg');
+            printReactor(true);
+        } else {
+            errorAlert('Грубая ошибка в системах безопасности. Возможно, не хватает СУЗ или стоит убрать слив.')
         }
     } else {
-        errorAlert('Грубая ошибка в системах безопасности. Возможно, не хватает СУЗ или стоит убрать слив.')
+        errorAlert('Сейчас не время проектировать системы безопасности. Возможно, вы их уже сделали. Или не хватает оборудования I и II контура.')
     }
-
-
 });
 document.getElementById('Start').addEventListener('click', function() {
-  animateTurbine();
+    // if (isTvel && isTvs && isReactor && isPG && isTeplo && isSB && isRadBez) {
+       animateWork();
+       testTurbine4();
+    // }
+    // else {
+    //     errorAlert('АЭС не сконструирована.')
+    // }
 });
 document.getElementById('test').addEventListener('click', function() {
     testTurbine4()
