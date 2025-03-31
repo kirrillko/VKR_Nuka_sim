@@ -622,8 +622,8 @@
     <fieldset>
         <legend>Управление</legend>
         <button id="Start">Пуск</button>
-        <button>Останов</button>
-        <button id="test">Тест</button>
+        <button id="Stop">Останов</button>
+<!--        <button id="test">Тест</button>-->
     </fieldset>
     <fieldset>
         <legend>Небольшие инциденты</legend>
@@ -754,15 +754,20 @@ const pg_yCoord = 0;
 // let isRadBez = false;
 
 class AesStatusSystem {
-  constructor() {
-    this.isTvel = false;
-    this.isTvs = false;
-    this.isReactor = false;
-    this.isPG = false;
-    this.isTeplo = false;
-    this.isSB = false;
-    this.isRadBez = false;
-  }
+    constructor() {
+        // поля для конструирования
+        this.isTvel = false;
+        this.isTvs = false;
+        this.isReactor = false;
+        this.isPG = false;
+        this.isTeplo = false;
+        this.isSB = false;
+        this.isRadBez = false;
+
+        // поля для эксплуатации
+        this.isWorking = false;
+        this.isADF = false;
+    }
 
   activateSystem(systemName) {
     if (this.hasOwnProperty(systemName)) {
@@ -794,6 +799,10 @@ class AesStatusSystem {
 
   isRadBezTurn() {
       return this.isTvel && this.isTvs && this.isReactor && this.isPG && this.isTeplo && this.isSB && !this.isRadBez;
+  }
+
+  isReadyToWork() {
+        return this.isTvel && this.isTvs && this.isReactor && this.isPG && this.isTeplo && this.isSB && this.isRadBez;
   }
 }
 
@@ -1479,7 +1488,7 @@ function testTurbine4(){
 
     // Функция анимации
     function animate() {
-      if (!isAnimating) return; // Останавливаем анимацию, если условие не выполняется
+      if (!aesStatus.isWorking) return; // Останавливаем анимацию, если условие не выполняется
 
       requestAnimationFrame(animate);
 
@@ -1555,7 +1564,7 @@ function testTurbine4(){
 //       console.log("Анимация остановлена");
 //     }, 10000); // ?? миллисекунд
 // }
-// Построение техники по нажатиям кнопок
+// Анимация запуска внутри реактора
 function animateWork() {
     const textureLoader = new THREE.TextureLoader();
     const textures = [];
@@ -1596,6 +1605,10 @@ function animateWork() {
         let animationId;
 
         function animate(timestamp) {
+            if (!aesStatus.isWorking) {
+                return;
+            }
+
             animationId = requestAnimationFrame(animate);
 
             // Первый кадр - инициализация времени
@@ -1625,7 +1638,7 @@ function animateWork() {
             material.dispose();
             textures.forEach(t => t.dispose());
             console.log("Анимация завершена");
-        }, 10000);
+        }, 100000);
     });
 }
 document.getElementById('loadTvel').addEventListener('click', function() {
@@ -1792,15 +1805,21 @@ document.getElementById('btnSB').addEventListener('click', function() {
     }
 });
 document.getElementById('Start').addEventListener('click', function() {
-    // if (isTvel && isTvs && isReactor && isPG && isTeplo && isSB && isRadBez) {
+    // if (aesStatus.isReadyToWork()) {
+        aesStatus.isWorking = true;
        animateWork();
        testTurbine4();
+    // } else {
+    //     errorAlert('АЭС не готова к запуску. Сначала завершите конструирование.');
     // }
-    // else {
-    //     errorAlert('АЭС не сконструирована.')
-    // }
+
 });
-document.getElementById('test').addEventListener('click', function() {
-    testTurbine4()
+// document.getElementById('test').addEventListener('click', function() {
+//     testTurbine4()
+// });
+document.getElementById('Stop').addEventListener('click', function() {
+    aesStatus.isWorking = false;
+    printElement(1, 1, 4, 0, '/static/vver/turbine.jpg');
+    printElement(0.75, 4, reactor_xCoord, reactor_yCoord,'/static/vver/reactor_vver.jpg');
 });
 </script>
