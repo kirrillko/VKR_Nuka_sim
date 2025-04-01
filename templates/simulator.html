@@ -806,7 +806,41 @@ class AesStatusSystem {
   }
 }
 
+class AesDynamicData {
+  constructor() {
+    // Добавляем метод setProperties в сам объект (не в Proxy)
+    this.setProperties = (...args) => {
+      if (args.length % 2 !== 0) {
+        throw new Error("Нечетное количество аргументов. Ожидаются пары ключ-значение");
+      }
+
+      for (let i = 0; i < args.length; i += 2) {
+        const key = args[i];
+        const value = args[i + 1];
+        this[key] = value;
+      }
+    };
+
+    // Proxy для автоматического создания вложенных объектов
+    return new Proxy(this, {
+      get(target, prop) {
+        // Пропускаем служебные свойства и методы
+        if (prop in target || typeof prop === 'symbol') {
+          return target[prop];
+        }
+
+        if (!target[prop]) {
+          target[prop] = new AesDynamicData();
+        }
+        return target[prop];
+      }
+    });
+  }
+}
+
+
 let aesStatus = new AesStatusSystem();
+let aesData = new AesDynamicData();
 
 
 // Функция отрисовки твэла
@@ -823,33 +857,47 @@ function loadTvel() {
             texture = textureLoader.load('static/vver/tvel_krest.png');
         }
         const fuel = document.querySelector('input[name="fuel"]:checked').value;
-        const pd = document.querySelector('input[name="PD"]:checked').value;
+        // const pd = document.querySelector('input[name="PD"]:checked').value;
         // const case = document.querySelector('input[name="case"]:checked').value;
         // const percentage = document.querySelector('input[class="slider"]:checked').value;
         const percentage = document.getElementById('slider').value;
         if ((fuel=='metu' || fuel=='uo2')  && (percentage>4 && percentage<20)) {
-          // Создаем плоскость, на которую наложим текстуру
-          const geometry = new THREE.PlaneGeometry(0.3, 5);  // Размер плоскости
-          const material = new THREE.MeshBasicMaterial({ map: texture });
-          const plane = new THREE.Mesh(geometry, material);
+            // Создаем плоскость, на которую наложим текстуру
+            const geometry = new THREE.PlaneGeometry(0.3, 5);  // Размер плоскости
+            const material = new THREE.MeshBasicMaterial({ map: texture });
+            const plane = new THREE.Mesh(geometry, material);
 
-          // Устанавливаем позицию изображения на заданные координаты
-          plane.position.set(xCoord, yCoord, zCoord);
+            // Устанавливаем позицию изображения на заданные координаты
+            plane.position.set(xCoord, yCoord, zCoord);
 
-          // Добавляем плоскость в сцену
-          scene.add(plane);
+            // Добавляем плоскость в сцену
+            scene.add(plane);
 
-          // Камера
-          camera.position.z = 5;
+            // Камера
+            camera.position.z = 5;
 
-          // Функция анимации для рендеринга
-          function animate() {
-            requestAnimationFrame(animate);
-            renderer.render(scene, camera);
-          }
-          animate();
+            // Функция анимации для рендеринга
+            function animate() {
+                requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+            }
+            animate();
 
-          aesStatus.activateSystem('isTvel');
+            aesStatus.activateSystem('isTvel');
+            // Задаем свойства для твэла через метод
+            aesData.tvel.setProperties(
+                'form', document.querySelector('input[name="tvel-form"]:checked').value,
+                'obogashenie', document.getElementById('slider').value,
+                'polostPD', document.querySelector('input[name="PD"]:checked').value,
+                'materialObolochki', document.querySelector('input[name="case"]:checked').value
+            );
+            console.log(
+                'Сконструирован твэл:',
+                aesData.tvel.form,
+                aesData.tvel.obogashenie,
+                aesData.tvel.polostPD,
+                aesData.tvel.materialObolochki
+            )
         } else {
             errorAlert('Ваш твэл не соответствует пути. Возможно, ваше обогащение не соответствует нормам МАГАТЭ для гражданской техники. Или вы выбрали топливо, которого нет в вашей стране.');
         }
@@ -897,7 +945,25 @@ function printTVS() {
           }
           animate();
 
-          aesStatus.activateSystem('isTvs')
+            aesStatus.activateSystem('isTvs')
+            aesData.tvs.setProperties(
+                'form', document.querySelector('input[name="tvs-form"]:checked').value,
+                'zamedlitel', document.querySelector('input[name="zamedl"]:checked').value,
+                'coolant', document.querySelector('input[name="cooler"]:checked').value,
+                'dr', document.querySelector('input[name="dist"]:checked').value,
+                'vp', document.querySelector('input[name="vygor"]:checked').value
+            );
+            console.log(
+                'Сконструирована ТВС:',
+                aesData.tvs.form,
+                aesData.tvs.zamedlitel,
+                aesData.tvs.coolant,
+                aesData.tvs.dr,
+                aesData.tvs.vp
+            )
+
+            // удаляем твэл
+            printElement(0.3, 5, xCoord, yCoord, '/static/vver/white.webp')
         }
         else {
             errorAlert('Ваша ТВС несовместима с выбранным путём. Возможно, вы выбрали неправильный замедлитель, теплоноситель или отсутсвуют дистанционирующие решётки.')
@@ -1639,7 +1705,7 @@ function animateWork() {
     });
 }
 
-function animateReactorWorking(){ // исправить под анимацию работы реактора
+function animateReactorWorking(){
     // Загрузчик текстур
     const textureLoader = new THREE.TextureLoader();
 
