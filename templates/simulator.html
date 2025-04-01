@@ -1465,7 +1465,7 @@ function testTurbine4(){
 
     // Массив для хранения текстур
     const textures = [];
-    for (let i = 202; i <= 289; i++) { // Предположим, у вас 10 текстур
+    for (let i = 202; i <= 210; i++) { // Предположим, у вас 10 текстур
       const texture = textureLoader.load(`static/turbine frames/Анимация турбины_${i}.jpg`);
       textures.push(texture);
     }
@@ -1483,9 +1483,6 @@ function testTurbine4(){
     // Индекс текущей текстуры
     let currentTextureIndex = 0;
 
-    // Условие для анимации
-    let isAnimating = true;
-
     // Функция анимации
     function animate() {
       if (!aesStatus.isWorking) return; // Останавливаем анимацию, если условие не выполняется
@@ -1497,7 +1494,7 @@ function testTurbine4(){
         currentTextureIndex = (currentTextureIndex + 1) % textures.length; // Переход к следующей текстуре
         material.map = textures[currentTextureIndex]; // Применяем новую текстуру
         material.needsUpdate = true; // Обновляем материал
-      }, 100);
+      }, 1000);
 
       renderer.render(scene, camera);
     }
@@ -1564,7 +1561,7 @@ function testTurbine4(){
 //       console.log("Анимация остановлена");
 //     }, 10000); // ?? миллисекунд
 // }
-// Анимация запуска внутри реактора
+// Анимация запуска внутри реактора ОБЛАСТЬ СО ВСЕМИ СБ
 function animateWork() {
     const textureLoader = new THREE.TextureLoader();
     const textures = [];
@@ -1641,6 +1638,57 @@ function animateWork() {
         }, 100000);
     });
 }
+
+function animateReactorWorking(){ // исправить под анимацию работы реактора
+    // Загрузчик текстур
+    const textureLoader = new THREE.TextureLoader();
+
+    // Массив для хранения текстур
+    const textures = [];
+    for (let i = 1; i <= 3; i++) {
+      const texture = textureLoader.load(`static/accidents_vver/Анимация запуска реактора ${i}.png`);
+      textures.push(texture);
+    }
+
+    // Создаем плоскость с начальной текстурой
+    const geometry = new THREE.PlaneGeometry(0.75, 4);
+    const material = new THREE.MeshBasicMaterial({ map: textures[0] });
+    const plane = new THREE.Mesh(geometry, material);
+    plane.position.set(reactor_xCoord, reactor_yCoord, zCoord);
+    scene.add(plane);
+
+    // Позиционируем камеру
+    camera.position.z = 5;
+
+    // Индекс текущей текстуры
+    let currentTextureIndex = 0;
+
+    // Функция анимации
+    function animate() {
+      if (!aesStatus.isWorking) return; // Останавливаем анимацию, если условие не выполняется
+
+      requestAnimationFrame(animate);
+
+      // Меняем текстуру каждые 100 мс
+      setTimeout(() => {
+        currentTextureIndex = (currentTextureIndex + 1) % textures.length; // Переход к следующей текстуре
+        material.map = textures[currentTextureIndex]; // Применяем новую текстуру
+        material.needsUpdate = true; // Обновляем материал
+      }, 1000);
+
+      renderer.render(scene, camera);
+    }
+
+    // Запускаем анимацию
+    animate();
+
+    // Пример условия для остановки анимации
+    // setTimeout(() => {
+    //   isAnimating = false; // Останавливаем анимацию через 10 секунд
+    //   console.log("Анимация остановлена");
+    // }, 10000); // 10 секунд
+}
+
 document.getElementById('loadTvel').addEventListener('click', function() {
   loadTvel();
 });
@@ -1805,10 +1853,12 @@ document.getElementById('btnSB').addEventListener('click', function() {
     }
 });
 document.getElementById('Start').addEventListener('click', function() {
+    // раскомментировать, чтобы связать запуск с логикой конструирования
     // if (aesStatus.isReadyToWork()) {
         aesStatus.isWorking = true;
-       animateWork();
+       // animateWork();
        testTurbine4();
+       animateReactorWorking();
     // } else {
     //     errorAlert('АЭС не готова к запуску. Сначала завершите конструирование.');
     // }
@@ -1820,6 +1870,7 @@ document.getElementById('Start').addEventListener('click', function() {
 document.getElementById('Stop').addEventListener('click', function() {
     aesStatus.isWorking = false;
     printElement(1, 1, 4, 0, '/static/vver/turbine.jpg');
-    printElement(0.75, 4, reactor_xCoord, reactor_yCoord,'/static/vver/reactor_vver.jpg');
+    printElement(0.75, 4, reactor_xCoord, reactor_yCoord, '/static/vver/reactor_vver.jpg');
+    // printReactor(true);
 });
 </script>
