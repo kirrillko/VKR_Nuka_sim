@@ -584,7 +584,7 @@
         <div>
             <img src="static\interface\rb_conc.png" style="height: 100px;">
         </div>   
-        <input type="checkbox" id="rb_conc" name="rb1" value="rb_conc" />
+        <input type="radio" id="rb_conc" name="rb" value="rb_conc" />
         <label for="rb_conc">Бетон</label>
     </div>
     <!-- <div>
@@ -598,21 +598,21 @@
         <div>
             <img src="static\interface\rb_lead.png" style="height: 100px;">
         </div>   
-        <input type="checkbox" id="rb_lead" name="rb2" value="rb_lead" />
+        <input type="radio" id="rb_lead" name="rb" value="rb_lead" />
         <label for="rb_lead">Свинец</label>
     </div>
     <div>
         <div>
             <img src="static\interface\rb_wood.png" style="height: 100px;">
         </div>   
-        <input type="checkbox" id="rb_wood" name="rb3" value="rb_wood" />
+        <input type="radio" id="rb_wood" name="rb" value="rb_wood" />
         <label for="rb_wood">Дерево</label>
     </div>
     <div>
         <div>
             <img src="static\interface\rb_sand.png" style="height: 100px;">
         </div>   
-        <input type="checkbox" id="rb_sand" name="rb4" value="rb_sand" />
+        <input type="radio" id="rb_sand" name="rb" value="rb_sand" />
         <label for="rb_sand">Песок</label>
     </div>
     <button id="btnRadBez">Построить</button>
@@ -1030,7 +1030,23 @@ function printReactor(repeat=false) {
 
             animate();
 
-            aesStatus.activateSystem('isReactor');
+            if (!repeat) {
+                aesStatus.activateSystem('isReactor');
+                aesData.reactor.setProperties(
+                    'form', document.querySelector('input[name="reactor-form"]:checked').value,
+                    'loops', document.querySelector('select[name="count_loops"]').value,
+                    'adf', document.querySelector('input[name="debrise"]:checked').value
+                );
+                console.log(
+                    'Сконструирован реактор:',
+                    aesData.reactor.form,
+                    aesData.reactor.loops,
+                    aesData.reactor.adf
+                )
+                // стираем твс
+                printElement(0.3, 5, tvs_xCoord, tvs_yCoord, '/static/vver/white.webp')
+            }
+
         } else {
             errorAlert("Вы выбрали неправильную компоновку или количество петель.")
         }
@@ -1038,7 +1054,6 @@ function printReactor(repeat=false) {
         errorAlert('Сейчас не время конструировать реактор. Возможно, он уже сконструирован. Или нет его внутренностей (твэл, твс).')
     }
 }
-
 
 function printPG() {
     if (aesStatus.isPGTurn()) {
@@ -1094,6 +1109,16 @@ function printPG() {
           animate();
 
           aesStatus.activateSystem('isPG');
+
+          aesData.steamGenerator.setProperties(
+                'form', document.querySelector('input[name="tube-form"]:checked').value,
+                'dr', document.querySelector('input[name="is_pg_dist"]:checked').value
+          );
+          console.log(
+              'Сконструирован парогенератор:',
+              aesData.steamGenerator.form,
+              aesData.steamGenerator.dr
+          )
         }
         else {
             errorAlert('Не хватает дистанционирующих решёток для трубочек парогенератора.')
@@ -1266,42 +1291,46 @@ function printCondensator() {
 
 function printRadBez() {
     if (aesStatus.isRadBezTurn()) {
-        let is_beton = 0;
-        try {
-            is_beton = document.querySelector('input[name="rb1"]:checked').value;
-        }
-        catch(exceptionVar) {
-            is_beton = 0;
-        }
-
-        let is_lead = 0;
-        try {
-            is_lead = document.querySelector('input[name="rb2"]:checked').value;
-        }
-        catch(exceptionVar) {
-            is_lead = 0;
-        }
-
-        let is_wood = 0;
-        try {
-            is_wood = document.querySelector('input[name="rb3"]:checked').value;
-        }
-        catch(exceptionVar) {
-            is_wood = 0;
-        }
-
-        let is_sand = 0;
-        try {
-            is_sand = document.querySelector('input[name="rb4"]:checked').value;
-        }
-        catch(exceptionVar) {
-            is_sand = 0;
-        }
+        let material = document.querySelector('input[name="rb"]:checked').value;
+        // let is_beton = 0;
+        // try {
+        //     is_beton = document.querySelector('input[name="rb1"]:checked').value;
+        // }
+        // catch(exceptionVar) {
+        //     is_beton = 0;
+        // }
+        //
+        // let is_lead = 0;
+        // try {
+        //     is_lead = document.querySelector('input[name="rb2"]:checked').value;
+        // }
+        // catch(exceptionVar) {
+        //     is_lead = 0;
+        // }
+        //
+        // let is_wood = 0;
+        // try {
+        //     is_wood = document.querySelector('input[name="rb3"]:checked').value;
+        // }
+        // catch(exceptionVar) {
+        //     is_wood = 0;
+        // }
+        //
+        // let is_sand = 0;
+        // try {
+        //     is_sand = document.querySelector('input[name="rb4"]:checked').value;
+        // }
+        // catch(exceptionVar) {
+        //     is_sand = 0;
+        // }
 
         const textureLoader = new THREE.TextureLoader();
         let texture = textureLoader.load('static/vver/beton.png');  // Укажите путь к вашему изображению
-        console.log(is_beton, is_lead, is_wood, is_sand);
-        if ((is_beton == 'rb_conc' || is_lead == 'rb_lead') && (is_wood == 0 && is_sand == 0)) {
+        // console.log(is_beton, is_lead, is_wood, is_sand);
+        if (
+            // (is_beton == 'rb_conc' || is_lead == 'rb_lead') && (is_wood == 0 && is_sand == 0)
+            material == 'rb_conc' || material == 'rb_lead'
+        ) {
 
             // Создаем плоскость, на которую наложим текстуру
             const geometry = new THREE.PlaneGeometry(0.25, 1.5);  // Размер плоскости
@@ -1330,9 +1359,15 @@ function printRadBez() {
             animate();
             // isRadBez = true;
             aesStatus.activateSystem('isRadBez');
+            aesData.rb.setProperties(
+                'material', document.querySelector('input[name="rb"]:checked').value
+            );
+            console.log(
+                'Спроектирована биологическая защита:', aesData.rb.material
+            )
         }
         else {
-            errorAlert('Выбраны неправильные материалы для биологической защиты. Персонал АЭС откажется работать.')
+            errorAlert('Выбран неправильный материал для биологической защиты. Персонал АЭС откажется работать.')
         }
     } else {
         errorAlert('Сейчас не время проектировать биологическую защиту. Её нужно строить в последнюю очередь перед эксплуатацией. Или она уже есть.')
@@ -1828,6 +1863,22 @@ document.getElementById('btnTeplo').addEventListener('click', function() {
             } catch (exceptionVar) {}
 
             aesStatus.activateSystem('isTeplo');
+
+            aesData.teplo.setProperties(
+                'gzn', document.querySelector('input[name="teplo"]:checked').value,
+                'pitNasos', document.querySelector('input[name="teplo2"]:checked').value,
+                'elmagNasos', document.querySelector('input[name="teplo3"]:checked')?.value ?? 0,
+                'turbine', document.querySelector('input[name="teplo4"]:checked').value,
+                'condensator', document.querySelector('input[name="teplo5"]:checked').value
+            );
+            console.log(
+                'Подключена теплотехника:',
+                'ГЦН', aesData.teplo.gzn, ';',
+                'Пит. насос', aesData.teplo.pitNasos, ';',
+                'Электромаг. насос', aesData.teplo.elmagNasos, ';',
+                'Турбина', aesData.teplo.turbine, ';',
+                'Конденсатор', aesData.teplo.condensator
+            )
         }
         else {
             errorAlert('Неправильный набор теплотехники для этой установки.')
@@ -1907,6 +1958,24 @@ document.getElementById('btnSB').addEventListener('click', function() {
             }
 
             aesStatus.activateSystem('isSB');
+
+            aesData.sb.setProperties(
+                'germo', document.querySelector('input[name="sb_1"]:checked')?.value ?? 0,
+                'suz', document.querySelector('input[name="sb_2"]:checked')?.value ?? 0,
+                'ge', document.querySelector('input[name="sb_3"]:checked')?.value ?? 0,
+                'lovushka', document.querySelector('input[name="sb_4"]:checked')?.value ?? 0,
+                'sprinkler', document.querySelector('input[name="sb_5"]:checked')?.value ?? 0,
+                'sliv', document.querySelector('input[name="sb_6"]:checked')?.value ?? 0
+            );
+            console.log(
+                'Спроектированы системы безопасности:',
+                'гермооболочка', aesData.sb.germo, ';',
+                'СУЗ и АЗ', aesData.sb.suz, ';',
+                'гидроёмкости', aesData.sb.ge, ';',
+                'ловушка', aesData.sb.lovushka, ';',
+                'спринклерная система', aesData.sb.sprinkler, ';',
+                'аварийный слив', aesData.sb.sliv
+            )
 
             // строим реактор поверх систем безопасности
             // printElement(0.75, 4, reactor_xCoord, reactor_yCoord, 'static/vver/reactor_vver.jpg');
