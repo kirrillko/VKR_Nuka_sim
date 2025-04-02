@@ -1325,7 +1325,13 @@ function printRadBez() {
         // }
 
         const textureLoader = new THREE.TextureLoader();
-        let texture = textureLoader.load('static/vver/beton.png');  // Укажите путь к вашему изображению
+        let texture = textureLoader.load('static/vver/beton.png');
+        if (material == 'rb_conc') {
+            texture = textureLoader.load('static/vver/beton.png');
+        }
+        if (material == 'rb_lead') {
+            texture = textureLoader.load('static/vver/lead.webp');
+        }
         // console.log(is_beton, is_lead, is_wood, is_sand);
         if (
             // (is_beton == 'rb_conc' || is_lead == 'rb_lead') && (is_wood == 0 && is_sand == 0)
