@@ -195,6 +195,13 @@
           font-size: 14px;
         }
 
+        /* Стиль текста */
+        #greenMessage {
+          font-size: 16px;
+          margin-bottom: 20px;
+          color: white;
+        }
+
         #closeGreenAlert:hover {
           background-color: #0056b3;
         }
@@ -696,7 +703,7 @@
     </fieldset>
     <fieldset>
         <legend>Небольшие инциденты</legend>
-        <button>Посторонние предметы в контуре</button>
+        <button id="debrise">Посторонние предметы в контуре</button>
         <button>Коррозия</button>
     </fieldset>
     <fieldset>
@@ -882,8 +889,8 @@ class AesStatusSystem {
         this.isRadBez = false;
 
         // поля для эксплуатации
-        this.isWorking = false;
-        this.isADF = false;
+        // this.isWorking = false;
+        // this.isADF = false;
     }
 
   activateSystem(systemName) {
@@ -953,11 +960,28 @@ class AesDynamicData {
       }
     });
   }
+
+    isADF() {
+      return aesData.reactor.adf == 'deb_est';
+    }
+}
+
+class ElementGeometry {
+    constructor(x, y, w, h) {
+        this.x = x;
+        this.y = y;
+        this.width = w;
+        this.height = h;
+    }
 }
 
 
 let aesStatus = new AesStatusSystem();
 let aesData = new AesDynamicData();
+
+// задаём геометрию элементов
+const reactorGeo = new ElementGeometry(reactor_xCoord, reactor_yCoord, 0.75, 4);
+const peregruzGeo = new ElementGeometry(reactor_xCoord, reactor_yCoord + 1.5, 1.4, 1);
 
 
 // Функция отрисовки твэла
@@ -2212,12 +2236,24 @@ document.getElementById('Start').addEventListener('click', function() {
 
 });
 document.getElementById('test').addEventListener('click', function() {
-    testOneAnimation();
+    greenAlert('Тест')
 });
 document.getElementById('Stop').addEventListener('click', function() {
     aesStatus.isWorking = false;
     printElement(1, 1, 4, 0, '/static/vver/turbine.jpg');
     printElement(0.75, 4, reactor_xCoord, reactor_yCoord, '/static/vver/reactor_vver.jpg');
     // printReactor(true);
+});
+
+document.getElementById('debrise').addEventListener('click', function() {
+    if (aesData.isADF()) {
+        greenAlert('Успех! Посторонние предметы не попали в активную зону благодаря антидебризным фильтрам.')
+    }
+    else {
+        printElement(reactorGeo.width, reactorGeo.height, reactorGeo.x, reactorGeo.y, 'static/accidents_vver/reactor_opened.png');
+        printElement(peregruzGeo.width, peregruzGeo.height, peregruzGeo.x, peregruzGeo.y, 'static/accidents_vver/перегрузочная машина.png');
+        yellowAlert('Из-за отсутсвия АДФ посторонние предметы в I контуре попали в активную зону и вызвали коррозию. Это привело к необходимости остановить реактор и заменить повреждённые ТВС. Это нанесло экономический ущерб.')
+    }
+
 });
 </script>
