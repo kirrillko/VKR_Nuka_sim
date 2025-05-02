@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Симулятор ЯЭУ | Современный путь</title>
+    <title>Симулятор ЯЭУ | ВВЭР</title>
     <style>
         /* Стили для вкладок и содержимого */
         .tab {
@@ -34,7 +34,7 @@
         /* Стили для рабочей области */
         .work-area {
             width: 100%;
-            height: 75%;
+            height: 60%;
             background-color: #28a745; /* зелёный цвет */
             margin-bottom: 10px;
             display: flex;
@@ -129,8 +129,30 @@
           color: white;
         }
 
+        #closeErrorAlert:hover {
+          background-color: #0056b3;
+        }
+
+        /* Анимация появления */
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        /* жёлтый алерт */
+        /* Контейнер для контента */
+        .yellow-content {
+          background-color: yellow;
+          padding: 20px;
+          border-radius: 8px;
+          text-align: center;
+          min-width: 200px;
+          max-width: 400px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
         /* Стиль кнопки */
-        #closeErrorAlert {
+        #closeYellowAlert {
           padding: 10px 20px;
           background-color: green;
           color: white;
@@ -140,7 +162,40 @@
           font-size: 14px;
         }
 
-        #closeErrorAlert:hover {
+        #closeYellowAlert:hover {
+          background-color: #0056b3;
+        }
+
+        /* Анимация появления */
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        /* зелёный алерт */
+        /* Контейнер для контента */
+        .green-content {
+          background-color: green;
+          padding: 20px;
+          border-radius: 8px;
+          text-align: center;
+          min-width: 200px;
+          max-width: 400px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Стиль кнопки */
+        #closeGreenAlert {
+          padding: 10px 20px;
+          background-color: yellow;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          font-size: 14px;
+        }
+
+        #closeGreenAlert:hover {
           background-color: #0056b3;
         }
 
@@ -165,6 +220,20 @@
   <div class="error-content">
     <p id="errorMessage"></p>
     <button id="closeErrorAlert">Принято</button>
+  </div>
+</div>
+
+<div id="yellowAlert" class="modal">
+  <div class="yellow-content">
+    <p id="yellowMessage"></p>
+    <button id="closeYellowAlert">Принято</button>
+  </div>
+</div>
+
+<div id="greenAlert" class="modal">
+  <div class="green-content">
+    <p id="greenMessage"></p>
+    <button id="closeGreenAlert">Принято</button>
   </div>
 </div>
 
@@ -623,7 +692,7 @@
         <legend>Управление</legend>
         <button id="Start">Пуск</button>
         <button id="Stop">Останов</button>
-<!--        <button id="test">Тест</button>-->
+        <button id="test">Тест</button>
     </fieldset>
     <fieldset>
         <legend>Небольшие инциденты</legend>
@@ -695,6 +764,54 @@ function errorAlert(message) {
   const modal = document.getElementById('errorAlert');
   const alertMessage = document.getElementById('errorMessage');
   const closeButton = document.getElementById('closeErrorAlert');
+
+  // Устанавливаем сообщение
+  alertMessage.textContent = message;
+
+  // Показываем модальное окно
+  modal.style.display = 'flex';
+
+  // Закрываем модальное окно при нажатии на кнопку
+  closeButton.onclick = function() {
+    modal.style.display = 'none';
+  };
+
+  // Закрываем модальное окно, если нажать на фон
+  modal.onclick = function(e) {
+    if (e.target === modal) {
+      modal.style.display = 'none';
+    }
+  };
+}
+
+function yellowAlert(message) {
+  const modal = document.getElementById('yellowAlert');
+  const alertMessage = document.getElementById('yellowMessage');
+  const closeButton = document.getElementById('closeYellowAlert');
+
+  // Устанавливаем сообщение
+  alertMessage.textContent = message;
+
+  // Показываем модальное окно
+  modal.style.display = 'flex';
+
+  // Закрываем модальное окно при нажатии на кнопку
+  closeButton.onclick = function() {
+    modal.style.display = 'none';
+  };
+
+  // Закрываем модальное окно, если нажать на фон
+  modal.onclick = function(e) {
+    if (e.target === modal) {
+      modal.style.display = 'none';
+    }
+  };
+}
+
+function greenAlert(message) {
+  const modal = document.getElementById('greenAlert');
+  const alertMessage = document.getElementById('greenMessage');
+  const closeButton = document.getElementById('closeGreenAlert');
 
   // Устанавливаем сообщение
   alertMessage.textContent = message;
@@ -900,6 +1017,8 @@ function loadTvel() {
             )
         } else {
             errorAlert('Ваш твэл не соответствует пути. Возможно, ваше обогащение не соответствует нормам МАГАТЭ для гражданской техники. Или вы выбрали топливо, которого нет в вашей стране.');
+            // yellowAlert('Test')
+            // greenAlert('Test green')
         }
     }
     else {
@@ -1796,6 +1915,93 @@ function animateReactorWorking(){
     // }, 10000); // 10 секунд
 }
 
+function testOneAnimation() {
+    // Инициализация сцены, камеры и рендерера
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Параметры анимации
+    const params = {
+      position: new THREE.Vector3(0, 0, 0), // Координаты области
+      width: 4,                            // Ширина области
+      height: 3,                           // Высота области
+      frameDelay: 500,                     // Задержка между кадрами (мс)
+      framePaths: [                         // Пути к файлам кадров
+        '/static/accidents_vver/Анимация запуска реактора 1.png',
+        '/static/accidents_vver/Анимация запуска реактора 2.png',
+        '/static/accidents_vver/Анимация запуска реактора 3.png'
+        // ... добавьте пути к своим кадрам
+      ]
+    };
+
+    let textures = []; // Массив для хранения загруженных текстур
+    let animationInterval = null; // Ссылка на интервал анимации
+
+    // Загрузка текстур
+    new THREE.TextureLoader().load(
+      params.framePaths,
+      (loadedTextures) => {
+        textures = loadedTextures;
+        initAnimation();
+      }
+    );
+
+    function initAnimation() {
+      // Создание плоскости для отображения кадров
+      const geometry = new THREE.PlaneGeometry(params.width, params.height);
+      const material = new THREE.MeshBasicMaterial({
+        map: textures[0],
+        transparent: true
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.copy(params.position);
+      scene.add(mesh);
+
+      // Настройка камеры
+      camera.position.z = 5;
+
+      // Переменные анимации
+      let currentFrame = 0;
+
+      // Функция обновления кадра
+      function updateFrame() {
+        currentFrame++;
+
+        if (currentFrame >= textures.length) {
+          stopAnimation();
+          return;
+        }
+
+        material.map = textures[currentFrame];
+        material.needsUpdate = true;
+      }
+
+      // Запуск анимации
+      function startAnimation() {
+        animationInterval = setInterval(updateFrame, params.frameDelay);
+      }
+
+      // Остановка анимации
+      function stopAnimation() {
+        clearInterval(animationInterval);
+        animationInterval = null;
+      }
+
+      // Запуск анимации
+      startAnimation();
+
+      // Цикл рендеринга
+      function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+      animate();
+    }
+}
+
 document.getElementById('loadTvel').addEventListener('click', function() {
   loadTvel();
 });
@@ -1995,19 +2201,19 @@ document.getElementById('btnSB').addEventListener('click', function() {
 });
 document.getElementById('Start').addEventListener('click', function() {
     // раскомментировать, чтобы связать запуск с логикой конструирования
-    // if (aesStatus.isReadyToWork()) {
+    if (aesStatus.isReadyToWork()) {
         aesStatus.isWorking = true;
        // animateWork();
        testTurbine4();
        animateReactorWorking();
-    // } else {
-    //     errorAlert('АЭС не готова к запуску. Сначала завершите конструирование.');
-    // }
+    } else {
+        errorAlert('АЭС не готова к запуску. Сначала завершите конструирование.');
+    }
 
 });
-// document.getElementById('test').addEventListener('click', function() {
-//     testTurbine4()
-// });
+document.getElementById('test').addEventListener('click', function() {
+    testOneAnimation();
+});
 document.getElementById('Stop').addEventListener('click', function() {
     aesStatus.isWorking = false;
     printElement(1, 1, 4, 0, '/static/vver/turbine.jpg');
