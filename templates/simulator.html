@@ -652,6 +652,13 @@
         <input type="checkbox" id="sb_sliv" name="sb_6" value="sb_sliv" />
         <label for="sb_sliv">Слив воды</label>
     </div>
+    <div>
+        <div>
+            <img src="static\interface\diesel_generator.jpg" style="height: 100px;">
+        </div>
+        <input type="checkbox" id="sb_diesel" name="sb_7" value="sb_diesel" />
+        <label for="sb_diesel">Генераторы</label>
+    </div>
     <button id="btnSB">Построить</button>
 </div>
 
@@ -699,12 +706,14 @@
         <legend>Управление</legend>
         <button id="Start">Пуск</button>
         <button id="Stop">Останов</button>
-        <button id="test">Тест</button>
+<!--        <button id="test">Тест</button>-->
+        <button id="reset">Сброс</button>
+        <button id="analysis">Анализ</button>
     </fieldset>
     <fieldset>
         <legend>Небольшие инциденты</legend>
         <button id="debrise">Посторонние предметы в контуре</button>
-        <button>Коррозия</button>
+        <button id="corrosion">Коррозия</button>
     </fieldset>
     <fieldset>
         <legend>Серьёзные происшествия</legend>
@@ -964,6 +973,10 @@ class AesDynamicData {
     isADF() {
       return aesData.reactor.adf == 'deb_est';
     }
+
+    isNoCorrosion() {
+      return aesData.tvel.materialObolochki == 'steel' || aesData.tvel.materialObolochki == 'zr';
+    }
 }
 
 class ElementGeometry {
@@ -982,6 +995,85 @@ let aesData = new AesDynamicData();
 // задаём геометрию элементов
 const reactorGeo = new ElementGeometry(reactor_xCoord, reactor_yCoord, 0.75, 4);
 const peregruzGeo = new ElementGeometry(reactor_xCoord, reactor_yCoord + 1.5, 1.4, 1);
+const dieselGeo = new ElementGeometry(0.5, -2, 0.5, 0.75);
+
+// цепочка ответственности. серьёзные происшествия
+class SupportHandler {
+  constructor() {
+    this.nextHandler = null;
+  }
+
+  setNext(handler) {
+    this.nextHandler = handler;
+    return handler;
+  }
+
+  handle(request) {
+    if (this.nextHandler) {
+      return this.nextHandler.handle(request);
+    }
+    console.log('Запрос не может быть обработан. Максимальный уровень поддержки: 3');
+    return false;
+  }
+}
+
+class Level1Support extends SupportHandler {
+  handle(request) {
+    if (request.level <= 1) {
+      console.log('✅ Уровень 1: Запрос успешно обработан');
+      return true;
+    }
+    console.log('🟡 Уровень 1: Не может обработать запрос');
+    return super.handle(request);
+  }
+}
+
+class Level2Support extends SupportHandler {
+  handle(request) {
+    if (request.level <= 2) {
+      console.log('✅ Уровень 2: Запрос успешно обработан');
+      return true;
+    }
+    console.log('🟡 Уровень 2: Не может обработать запрос');
+    return super.handle(request);
+  }
+}
+
+class Level3Support extends SupportHandler {
+  handle(request) {
+    if (request.level <= 3) {
+      console.log('✅ Уровень 3: Запрос успешно обработан');
+      return true;
+    }
+    return super.handle(request);
+  }
+}
+
+// Клиентский код
+const level1 = new Level1Support();
+const level2 = new Level2Support();
+const level3 = new Level3Support();
+
+// Настройка цепочки обработки
+level1.setNext(level2).setNext(level3);
+
+// Тестовые запросы
+const simpleRequest = { level: 1 };
+const mediumRequest = { level: 2 };
+const complexRequest = { level: 3 };
+const impossibleRequest = { level: 4 };
+
+console.log('\n--- Простой запрос ---');
+level1.handle(simpleRequest);
+
+console.log('\n--- Средний запрос ---');
+level1.handle(mediumRequest);
+
+console.log('\n--- Сложный запрос ---');
+level1.handle(complexRequest);
+
+console.log('\n--- Невозможный запрос ---');
+level1.handle(impossibleRequest);
 
 
 // Функция отрисовки твэла
@@ -2176,6 +2268,14 @@ document.getElementById('btnSB').addEventListener('click', function() {
             is_sliv = 0;
         }
 
+        let is_diesel = 0;
+        try {
+            is_diesel = document.querySelector('input[name="sb_7"]:checked').value;
+        }
+        catch(exceptionVar) {
+            is_diesel = 0;
+        }
+
         if (is_sliv == 0 && is_suz !== 0) {
             if (is_germo !== 0) {
                 printElement(3, 6.5, -2, 0.5, 'static/vver/germoobolochka.png');
@@ -2193,6 +2293,10 @@ document.getElementById('btnSB').addEventListener('click', function() {
                 printElement(1, 0.2, -2, 3, 'static/vver/sprinkler.png');
             }
 
+            if (is_diesel !== 0) {
+                printElement(dieselGeo.width, dieselGeo.height, dieselGeo.x, dieselGeo.y, 'static/vver/diesel_generator.jpg');
+            }
+
             aesStatus.activateSystem('isSB');
 
             aesData.sb.setProperties(
@@ -2201,7 +2305,8 @@ document.getElementById('btnSB').addEventListener('click', function() {
                 'ge', document.querySelector('input[name="sb_3"]:checked')?.value ?? 0,
                 'lovushka', document.querySelector('input[name="sb_4"]:checked')?.value ?? 0,
                 'sprinkler', document.querySelector('input[name="sb_5"]:checked')?.value ?? 0,
-                'sliv', document.querySelector('input[name="sb_6"]:checked')?.value ?? 0
+                'sliv', document.querySelector('input[name="sb_6"]:checked')?.value ?? 0,
+                'diesel', document.querySelector('input[name="sb_7"]:checked')?.value ?? 0,
             );
             console.log(
                 'Спроектированы системы безопасности:',
@@ -2210,7 +2315,8 @@ document.getElementById('btnSB').addEventListener('click', function() {
                 'гидроёмкости', aesData.sb.ge, ';',
                 'ловушка', aesData.sb.lovushka, ';',
                 'спринклерная система', aesData.sb.sprinkler, ';',
-                'аварийный слив', aesData.sb.sliv
+                'аварийный слив', aesData.sb.sliv, ';',
+                'генераторы', aesData.sb.diesel
             )
 
             // строим реактор поверх систем безопасности
@@ -2239,10 +2345,14 @@ document.getElementById('test').addEventListener('click', function() {
     greenAlert('Тест')
 });
 document.getElementById('Stop').addEventListener('click', function() {
-    aesStatus.isWorking = false;
-    printElement(1, 1, 4, 0, '/static/vver/turbine.jpg');
-    printElement(0.75, 4, reactor_xCoord, reactor_yCoord, '/static/vver/reactor_vver.jpg');
-    // printReactor(true);
+    if (aesStatus.isWorking) {
+        aesStatus.isWorking = false;
+        printElement(1, 1, 4, 0, '/static/vver/turbine.jpg');
+        printElement(0.75, 4, reactor_xCoord, reactor_yCoord, '/static/vver/reactor_vver.jpg');
+    } else {
+        errorAlert('Реактор не запущен. АЭС не работает.')
+    }
+
 });
 
 document.getElementById('debrise').addEventListener('click', function() {
@@ -2253,6 +2363,16 @@ document.getElementById('debrise').addEventListener('click', function() {
         printElement(reactorGeo.width, reactorGeo.height, reactorGeo.x, reactorGeo.y, 'static/accidents_vver/reactor_opened.png');
         printElement(peregruzGeo.width, peregruzGeo.height, peregruzGeo.x, peregruzGeo.y, 'static/accidents_vver/перегрузочная машина.png');
         yellowAlert('Из-за отсутсвия АДФ посторонние предметы в I контуре попали в активную зону и вызвали коррозию. Это привело к необходимости остановить реактор и заменить повреждённые ТВС. Это нанесло экономический ущерб.')
+    }
+});
+
+document.getElementById('corrosion').addEventListener('click', function() {
+    if (aesData.isNoCorrosion()) {
+        greenAlert('Успех! Вы выбрали подходящий материал оболочки. Установка выдерживает коррозию.')
+    } else {
+        printElement(reactorGeo.width, reactorGeo.height, reactorGeo.x, reactorGeo.y, 'static/accidents_vver/reactor_opened.png');
+        printElement(peregruzGeo.width, peregruzGeo.height, peregruzGeo.x, peregruzGeo.y, 'static/accidents_vver/перегрузочная машина.png');
+        yellowAlert('Установка не выдерживает коррозию в активной зоне. Произошла разгерметизация оболочек твэлов. Пришлось перезагрузить реактор и заменить все ТВС.')
     }
 
 });
