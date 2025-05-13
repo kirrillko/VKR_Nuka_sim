@@ -720,7 +720,7 @@
         <button>Отключение электроэнергии</button>
         <button>Цунами + Землетрясение</button>
         <!-- <button>Падение самолёта</button> -->
-        <button>Отказ насоса (ГЦН)</button>
+        <button id="stop_gzn">Отказ насоса (ГЦН)</button>
     </fieldset>
 </div>
 
@@ -878,14 +878,8 @@ const reactor_yCoord = 0;
 const pg_xCoord = 1;
 const pg_yCoord = 0;
 
-// let isTvel = false;
-// let isTvs = false;
-// let isReactor = false;
-// let isPG = false;
-// let isTeplo = false;
-// let isSB = false;
-// let isRadBez = false;
 
+// статус и очерёдность конструирования
 class AesStatusSystem {
     constructor() {
         // поля для конструирования
@@ -896,10 +890,6 @@ class AesStatusSystem {
         this.isTeplo = false;
         this.isSB = false;
         this.isRadBez = false;
-
-        // поля для эксплуатации
-        // this.isWorking = false;
-        // this.isADF = false;
     }
 
   activateSystem(systemName) {
@@ -939,6 +929,7 @@ class AesStatusSystem {
   }
 }
 
+// вся информация обо всех введённых параметрах АЭС, а также проверки для аварий
 class AesDynamicData {
   constructor() {
     // Добавляем метод setProperties в сам объект (не в Proxy)
@@ -997,7 +988,7 @@ const reactorGeo = new ElementGeometry(reactor_xCoord, reactor_yCoord, 0.75, 4);
 const peregruzGeo = new ElementGeometry(reactor_xCoord, reactor_yCoord + 1.5, 1.4, 1);
 const dieselGeo = new ElementGeometry(0.5, -2, 0.5, 0.75);
 
-// цепочка ответственности. серьёзные происшествия
+// цепочка ответственности. серьёзные происшествия. основной хэндлер
 class SupportHandler {
   constructor() {
     this.nextHandler = null;
@@ -1012,68 +1003,72 @@ class SupportHandler {
     if (this.nextHandler) {
       return this.nextHandler.handle(request);
     }
-    console.log('Запрос не может быть обработан. Максимальный уровень поддержки: 3');
+    console.log('Запрос не может быть обработан');
     return false;
   }
 }
 
-class Level1Support extends SupportHandler {
-  handle(request) {
-    if (request.level <= 1) {
-      console.log('✅ Уровень 1: Запрос успешно обработан');
+// хэндлер, проверяющий количество петель
+class LoopsHandler extends SupportHandler {
+  handle() {
+    if (aesData.reactor.loops >= 4) {
+      console.log('✅ Количество петель 4 или более , успех');
+      greenAlert('Успех! Количество петель было 4 или более, благодаря чему при отказе ГЦН реактор смог работать на оставшихся петлях. Выведенный из строя ГЦН успел починить персонал АЭС.')
       return true;
     }
-    console.log('🟡 Уровень 1: Не может обработать запрос');
-    return super.handle(request);
+    console.log('🟡 Количество петель менее 4, неудача (авария)');
+    return super.handle();
   }
 }
 
-class Level2Support extends SupportHandler {
-  handle(request) {
-    if (request.level <= 2) {
-      console.log('✅ Уровень 2: Запрос успешно обработан');
+class GidroEmHandler extends SupportHandler {
+  handle() {
+    if (aesData.sb.ge !== 0) {
+      console.log('Успех на хэндлере гидроёмкостей. ГЕ есть.');
+      greenAlert('Было нарушено охлаждение реактора, но благодаря гидроёмкостям удалось его временно поддерживать. Поэтому хватило времени восстановить I контур.')
       return true;
     }
-    console.log('🟡 Уровень 2: Не может обработать запрос');
-    return super.handle(request);
+    console.log('Неудача на хэндлере гидроёмкостей. ГЕ нет.');
+    return super.handle();
   }
 }
 
-class Level3Support extends SupportHandler {
-  handle(request) {
-    if (request.level <= 3) {
-      console.log('✅ Уровень 3: Запрос успешно обработан');
+class LovushkaHandler extends SupportHandler {
+  handle() {
+    if (aesData.sb.lovushka !== 0) {
+      console.log('Успех на хэндлере ловушки. Ловушка есть.');
+      printElement(reactorGeo.width, reactorGeo.height, reactorGeo.x, reactorGeo.y, 'static/accidents_vver/reactor_destroyed.jpg');
+      printElement(1, 1, -2, -3, 'static/accidents_vver/lovushka_corium.png');
+      yellowAlert('Активная зона расплавилась, но кориум удалось локализовать в ловушке. Вы предотвратили распространение радиоактивности, однако реактор выведен из строя навсегда.');
       return true;
     }
-    return super.handle(request);
+    return super.handle();
   }
 }
 
-// Клиентский код
-const level1 = new Level1Support();
-const level2 = new Level2Support();
-const level3 = new Level3Support();
+class GermoHandler extends SupportHandler {
+  handle() {
+    if (aesData.sb.germo == 0) {
+      console.log('Хэндлер гермооболочки. Оболочки нет.');
+      printElement(reactorGeo.height, reactorGeo.width + 1.5, reactorGeo.x, reactorGeo.y + 3, 'static/accidents_vver/green_steam.png');
+      printElement(1, 1, -2, -3, 'static/accidents_vver/corium.jpg');
+      printElement(reactorGeo.width, reactorGeo.height, reactorGeo.x, reactorGeo.y, 'static/accidents_vver/reactor_destroyed.jpg');
+      errorAlert('Реактор расплавился, теплоноситель испарился, и вся радиоактивность попала в атмосферу. Вы не смогли предотвратить ядерную катастрофу.');
+      return true;
+    }
+    console.log('Хэндлер гермооболочки. Оболочка есть.');
+    return super.handle();
+  }
+}
 
-// Настройка цепочки обработки
-level1.setNext(level2).setNext(level3);
+// Создаём объекты хэндлеров
+const loopsHandler = new LoopsHandler();
+const geHandler = new GidroEmHandler();
+const lovushkaHandler = new LovushkaHandler();
+const germoHandler = new GermoHandler();
 
-// Тестовые запросы
-const simpleRequest = { level: 1 };
-const mediumRequest = { level: 2 };
-const complexRequest = { level: 3 };
-const impossibleRequest = { level: 4 };
-
-console.log('\n--- Простой запрос ---');
-level1.handle(simpleRequest);
-
-console.log('\n--- Средний запрос ---');
-level1.handle(mediumRequest);
-
-console.log('\n--- Сложный запрос ---');
-level1.handle(complexRequest);
-
-console.log('\n--- Невозможный запрос ---');
-level1.handle(impossibleRequest);
+// Настройка цепочки хэндлеров (обязанностей)
+loopsHandler.setNext(geHandler).setNext(lovushkaHandler).setNext(germoHandler);
 
 
 // Функция отрисовки твэла
@@ -2341,9 +2336,9 @@ document.getElementById('Start').addEventListener('click', function() {
     }
 
 });
-document.getElementById('test').addEventListener('click', function() {
-    greenAlert('Тест')
-});
+// document.getElementById('test').addEventListener('click', function() {
+//     greenAlert('Тест')
+// });
 document.getElementById('Stop').addEventListener('click', function() {
     if (aesStatus.isWorking) {
         aesStatus.isWorking = false;
@@ -2374,6 +2369,11 @@ document.getElementById('corrosion').addEventListener('click', function() {
         printElement(peregruzGeo.width, peregruzGeo.height, peregruzGeo.x, peregruzGeo.y, 'static/accidents_vver/перегрузочная машина.png');
         yellowAlert('Установка не выдерживает коррозию в активной зоне. Произошла разгерметизация оболочек твэлов. Пришлось перезагрузить реактор и заменить все ТВС.')
     }
-
 });
+
+document.getElementById('stop_gzn').addEventListener('click', function() {
+    // хэндлер
+    loopsHandler.handle(aesData);
+});
+
 </script>
