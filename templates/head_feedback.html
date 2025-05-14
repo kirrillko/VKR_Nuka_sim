@@ -1,5 +1,240 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    Здесь будет форма обратной связи.
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 20px;
+        }
+
+        .form-group {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .rating {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+            cursor: pointer;
+        }
+
+        input[type="radio"],
+        input[type="checkbox"] {
+            width: 1.2rem;
+            height: 1.2rem;
+        }
+
+        .navigation {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        button {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .error {
+            color: #dc3545;
+            margin-top: 0.5rem;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            color: white;
+        }
+
+        .notification.success {
+            background: #28a745;
+        }
+
+        .notification.error {
+            background: #dc3545;
+        }
+    </style>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<body x-data="formHandler()">
+    <div class="container">
+        <h1>Форма обратной связи</h1>
+        <form @submit.prevent="submitForm">
+            <!-- Кто вы? -->
+            <div class="form-group" x-show="step === 1">
+                <h3>Кто вы?</h3>
+                <template x-for="option in whoOptions" :key="option.value">
+                    <label>
+                        <input type="radio" name="who" x-model="formData.who"
+                               :value="option.value" required>
+                        <span x-text="option.label"></span>
+                    </label>
+                </template>
+                <p class="error" x-show="errors.who" x-text="errors.who"></p>
+            </div>
+
+            <!-- Вопросы с оценкой -->
+            <div class="form-group" x-show="step === 2">
+                <template x-for="question in ratingQuestions" :key="question.name">
+                    <div class="question">
+                        <h3 x-text="question.text"></h3>
+                        <div class="rating">
+                            <template x-for="i in 5" :key="i">
+                                <label>
+                                    <input type="radio"
+                                           :name="question.name"
+                                           x-model="formData[question.name]"
+                                           :value="i" required>
+                                    <span x-text="i"></span>
+                                </label>
+                            </template>
+                        </div>
+                        <p class="error" x-show="errors[question.name]"
+                           x-text="errors[question.name]"></p>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Чекбоксы реакторов -->
+            <div class="form-group" x-show="step === 3">
+                <h3>Какие реакторы хотите увидеть?</h3>
+                <template x-for="reactor in reactors" :key="reactor.value">
+                    <label>
+                        <input type="checkbox" x-model="formData.reactors"
+                               :value="reactor.value">
+                        <span x-text="reactor.label"></span>
+                    </label>
+                </template>
+            </div>
+
+            <!-- Навигация -->
+            <div class="navigation">
+                <button type="button" x-show="step > 1" @click="step--">Назад</button>
+                <button type="button" x-show="step < 3" @click="validateStep">Далее</button>
+                <button type="submit" x-show="step === 3">Отправить</button>
+            </div>
+        </form>
+
+        <!-- Уведомление -->
+        <div class="notification" x-show="showNotification"
+             :class="notificationType" x-text="notificationText"></div>
+    </div>
+
+    <script>
+        function formHandler() {
+            return {
+                step: 1,
+                formData: {
+                    who: '',
+                    simulator: null,
+                    recommendation: null,
+                    usability: null,
+                    reactors: []
+                },
+                errors: {},
+                showNotification: false,
+                notificationText: '',
+                notificationType: 'success',
+
+                whoOptions: [
+                    { value: 'engineer', label: 'Инженер атомной отрасли' },
+                    { value: 'school-physics', label: 'Школьник с интересом к физике' },
+                    { value: 'school-no-physics', label: 'Школьник без интереса к физике' },
+                    { value: 'other', label: 'Другое' }
+                ],
+
+                ratingQuestions: [
+                    { name: 'simulator', text: 'Насколько вам понравился симулятор?' },
+                    { name: 'recommendation', text: 'Порекомендуете знакомым?' },
+                    { name: 'usability', text: 'Удобство использования сайта?' }
+                ],
+
+                reactors: [
+                    { value: 'CANDU', label: 'Канадские CANDU' },
+                    { value: 'RBMK', label: 'Советские РБМК' },
+                    { value: 'VVER-600', label: 'ВВЭР-600' },
+                    { value: 'BN-4gen', label: '4-ое поколение БН' },
+                    { value: 'Research', label: 'Исследовательские реакторы' },
+                    { value: 'Space', label: 'Космические установки' }
+                ],
+
+                validateStep() {
+                    this.errors = {};
+                    let isValid = true;
+
+                    if (this.step === 1 && !this.formData.who) {
+                        this.errors.who = 'Пожалуйста, выберите вариант';
+                        isValid = false;
+                    }
+
+                    if (this.step === 2) {
+                        this.ratingQuestions.forEach(q => {
+                            if (!this.formData[q.name]) {
+                                this.errors[q.name] = 'Пожалуйста, выберите оценку';
+                                isValid = false;
+                            }
+                        });
+                    }
+
+                    if (isValid) this.step++;
+                },
+
+                async submitForm() {
+                    try {
+                        const response = await fetch('/submit', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                ...this.formData,
+                                reactors: this.formData.reactors.join(',')
+                            })
+                        });
+
+                        if (response.ok) {
+                            this.showNotification = true;
+                            this.notificationText = 'Спасибо за ваш отзыв!';
+                            this.notificationType = 'success';
+                            setTimeout(() => this.showNotification = false, 3000);
+                            this.formData = {
+                                who: '',
+                                simulator: null,
+                                recommendation: null,
+                                usability: null,
+                                reactors: []
+                            };
+                            this.step = 1;
+                        }
+                    } catch (error) {
+                        this.showNotification = true;
+                        this.notificationText = 'Ошибка отправки формы';
+                        this.notificationType = 'error';
+                    }
+                }
+            }
+        }
+    </script>
+</body>
 {% endblock %}

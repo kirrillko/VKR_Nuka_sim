@@ -1,5 +1,184 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    Здесь будет информация о сайте.
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap');
+
+    .about-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        color: #e6f7ff;
+        font-family: 'Roboto', sans-serif;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .atom-decoration {
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        top: -50px;
+        right: -50px;
+        opacity: 0.1;
+        animation: atom-rotate 20s linear infinite;
+    }
+
+    @keyframes atom-rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 2.5rem;
+        color: #00fff2;
+        text-shadow: 0 0 15px rgba(0,255,242,0.5);
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .content-section {
+        margin-bottom: 3rem;
+        padding: 2rem;
+        background: rgba(255,255,255,0.05);
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+        transition: transform 0.3s ease;
+    }
+
+    .content-section:hover {
+        transform: translateY(-5px);
+    }
+
+    .content-section h2 {
+        color: #00ff88;
+        font-family: 'Orbitron', sans-serif;
+        margin-bottom: 1.5rem;
+        font-size: 1.8rem;
+    }
+
+    .content-section p {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        margin-bottom: 1.5rem;
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .content-section p:before {
+        content: '⚛';
+        position: absolute;
+        left: 0;
+        top: -3px;
+        font-size: 1.2rem;
+        color: #00fff2;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-top: 3rem;
+    }
+
+    .feature-card {
+        padding: 1.5rem;
+        background: rgba(0, 255, 242, 0.1);
+        border-radius: 12px;
+        border: 1px solid rgba(0, 255, 242, 0.2);
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+        background: rgba(0, 255, 242, 0.2);
+        transform: scale(1.05);
+    }
+
+    .feature-card i {
+        font-size: 2.5rem;
+        color: #00fff2;
+        margin-bottom: 1rem;
+    }
+
+    .glow {
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(0,255,242,0.1) 0%, rgba(0,0,0,0) 70%);
+        pointer-events: none;
+    }
+
+    @media (max-width: 768px) {
+        .about-container {
+            margin: 1rem;
+            padding: 1rem;
+        }
+
+        .title {
+            font-size: 2rem;
+        }
+    }
+</style>
+
+<div class="about-container">
+    <div class="glow" style="top: -200px; right: -200px;"></div>
+    <div class="glow" style="bottom: -200px; left: -200px;"></div>
+
+    <svg class="atom-decoration" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="45" stroke="#00fff2" stroke-width="1" fill="none">
+            <animate attributeName="stroke-dashoffset" from="0" to="300" dur="5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="50" cy="50" r="35" stroke="#00ff88" stroke-width="1" fill="none" transform="rotate(60 50 50)">
+            <animate attributeName="stroke-dashoffset" from="300" to="0" dur="5s" repeatCount="indefinite"/>
+        </circle>
+    </svg>
+
+    <h1 class="title">Симулятор конструирования ядерных реакторов</h1>
+
+    <div class="content-section">
+        <p>Данное веб-приложение разработано независимым студентом-программистом в качестве дипломной работы.</p>
+    </div>
+
+    <div class="content-section">
+        <h2><i class="fas fa-atom"></i> Для кого этот проект?</h2>
+        <p>Сайт предназначен для школьников с интересом к физике. Он позволяет попробовать себя в роли конструктора ядерных реакторов.</p>
+    </div>
+
+    <div class="content-section">
+        <h2><i class="fas fa-flask"></i> Возможности симулятора</h2>
+        <p>Здесь вы можете сконструировать всю атомную электростанцию типа ВВЭР большой мощности и посмотреть, как она себя ведёт в аварийных ситуациях.</p>
+    </div>
+
+    <div class="content-section">
+        <h2><i class="fas fa-bullseye"></i> Наша миссия</h2>
+        <p>Цель приложения - профориентация школьников и популяризация атомных профессий. Это просто научно-популярный контент.</p>
+    </div>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <i class="fas fa-shield-alt"></i>
+            <h3>Безопасное симулирование</h3>
+            <p>Изучайте атомные технологии без риска</p>
+        </div>
+
+        <div class="feature-card">
+            <i class="fas fa-graduation-cap"></i>
+            <h3>Научно-популярный контент</h3>
+            <p>Интерактивный симулятор</p>
+        </div>
+
+        <div class="feature-card">
+            <i class="fas fa-chart-line"></i>
+            <h3>Реальная физика</h3>
+            <p>Точно передана атомная предметная область</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://kit.fontawesome.com/your-kit-code.js"></script>
 {% endblock %}

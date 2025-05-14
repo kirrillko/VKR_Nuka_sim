@@ -717,8 +717,8 @@
     </fieldset>
     <fieldset>
         <legend>Серьёзные происшествия</legend>
-        <button>Отключение электроэнергии</button>
-        <button>Цунами + Землетрясение</button>
+        <button id="stop_electro">Отключение электроэнергии</button>
+        <button id="tsunami">Цунами + Землетрясение</button>
         <!-- <button>Падение самолёта</button> -->
         <button id="stop_gzn">Отказ насоса (ГЦН)</button>
     </fieldset>
@@ -1061,14 +1061,48 @@ class GermoHandler extends SupportHandler {
   }
 }
 
+class SprinkleHandler extends SupportHandler {
+  handle() {
+    if (aesData.sb.sprinkler !== 0) {
+      console.log('Хэндлер спринклерной системы. Она есть.');
+      printElement(1, 0.5, -2, 2.5, 'static/accidents_vver/sprinkle_water.png');
+      printElement(2, 1.5, -2, -2.8, 'static/accidents_vver/green_water.png');
+      printElement(reactorGeo.width, reactorGeo.height, reactorGeo.x, reactorGeo.y, 'static/accidents_vver/reactor_destroyed.jpg');
+      yellowAlert('Реактор разрушен, но вам удалось локализировать радиоактивность внутри гермооболочки. Благодаря спринклерной системе удалось остановить рост давления испарившегося теплоносителя, и гермооболочка не разрушилась. Теплоноситель удалось частично сконденсировать.')
+      return true;
+    }
+    console.log('Хэндлер спринклерной системы. Её нет.');
+    printElement(reactorGeo.height, reactorGeo.width + 1.5, reactorGeo.x, reactorGeo.y + 3, 'static/accidents_vver/green_steam.png');
+    printElement(1, 1, -2, -3, 'static/accidents_vver/corium.jpg');
+    printElement(reactorGeo.width, reactorGeo.height, reactorGeo.x, reactorGeo.y, 'static/accidents_vver/reactor_destroyed.jpg');
+    errorAlert('Реактор разрушен. Теплоноситель испарился, давление пара под гермооболочкой росло, и она разрушилась. Радиоактивность попала в атмосферу. Произошла ядерная катастрофа.')
+    return super.handle();
+  }
+}
+
+class DieselHandler extends SupportHandler {
+  handle() {
+    if (aesData.sb.diesel !== 0) {
+      console.log('Хэндлер дизельных генераторов. Они есть.');
+      greenAlert('Благодаря дизельным генераторам удалось оперативно восстановить электропитание насосов (ГЦН), и охлаждение I контура не было нарушено. Электросети успели восстановить. Авария предотвращена.')
+      return true;
+    }
+    console.log('Хэндлер дизельных генераторов. Их нет.');
+    return super.handle();
+  }
+}
+
 // Создаём объекты хэндлеров
 const loopsHandler = new LoopsHandler();
 const geHandler = new GidroEmHandler();
 const lovushkaHandler = new LovushkaHandler();
 const germoHandler = new GermoHandler();
+const sprinkleHandler = new SprinkleHandler();
+const dieselHandler = new DieselHandler();
 
 // Настройка цепочки хэндлеров (обязанностей)
-loopsHandler.setNext(geHandler).setNext(lovushkaHandler).setNext(germoHandler);
+loopsHandler.setNext(geHandler).setNext(lovushkaHandler).setNext(germoHandler).setNext(sprinkleHandler);
+dieselHandler.setNext(geHandler);
 
 
 // Функция отрисовки твэла
@@ -2345,7 +2379,7 @@ document.getElementById('Stop').addEventListener('click', function() {
         printElement(1, 1, 4, 0, '/static/vver/turbine.jpg');
         printElement(0.75, 4, reactor_xCoord, reactor_yCoord, '/static/vver/reactor_vver.jpg');
     } else {
-        errorAlert('Реактор не запущен. АЭС не работает.')
+        errorAlert('Реактор не запущен. АЭС не работает.');
     }
 
 });
@@ -2372,8 +2406,15 @@ document.getElementById('corrosion').addEventListener('click', function() {
 });
 
 document.getElementById('stop_gzn').addEventListener('click', function() {
-    // хэндлер
     loopsHandler.handle(aesData);
+});
+
+document.getElementById('stop_electro').addEventListener('click', function() {
+    dieselHandler.handle(aesData);
+});
+
+document.getElementById('tsunami').addEventListener('click', function() {
+    geHandler.handle(aesData);
 });
 
 </script>

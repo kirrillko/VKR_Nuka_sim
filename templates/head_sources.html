@@ -1,5 +1,190 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    Здесь будет список использованных источников.
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400;700&display=swap');
+
+    .literature-container {
+        max-width: 1200px;
+        margin: 3rem auto;
+        padding: 2rem;
+        background: #f8f9fa;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        position: relative;
+        padding: 2rem 0;
+        background: linear-gradient(45deg, #2c3e50, #34495e);
+        color: white;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .page-header:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><text x="50%" y="50%" font-size="40" fill="%23ffffff10" dominant-baseline="middle" text-anchor="middle">⚛</text></svg>');
+        opacity: 0.1;
+    }
+
+    .literature-list {
+        counter-reset: literature-counter;
+        padding: 0;
+        margin: 0;
+    }
+
+    .literature-item {
+        counter-increment: literature-counter;
+        background: white;
+        margin-bottom: 1.5rem;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 3px 15px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .literature-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+    }
+
+    .literature-item:before {
+        content: counter(literature-counter);
+        position: absolute;
+        left: -30px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-family: 'Playfair Display', serif;
+        font-size: 4rem;
+        font-weight: 700;
+        color: #e74c3c;
+        opacity: 0.3;
+        z-index: 0;
+    }
+
+    .book-meta {
+        font-family: 'Roboto', sans-serif;
+        position: relative;
+        z-index: 1;
+    }
+
+    .authors {
+        font-weight: 700;
+        color: #2c3e50;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .title {
+        font-style: italic;
+        color: #34495e;
+        margin-bottom: 0.5rem;
+        font-size: 1.05rem;
+    }
+
+    .details {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+
+    .decorative-line {
+        height: 2px;
+        background: linear-gradient(90deg, transparent 0%, #e74c3c 50%, transparent 100%);
+        margin: 2rem 0;
+        opacity: 0.5;
+    }
+
+    @media (max-width: 768px) {
+        .literature-container {
+            margin: 1rem;
+            padding: 1rem;
+        }
+
+        .literature-item {
+            padding: 1.5rem;
+        }
+
+        .literature-item:before {
+            left: -20px;
+            font-size: 3rem;
+        }
+    }
+</style>
+
+<div class="literature-container">
+    <div class="page-header">
+        <h1 style="font-family: 'Playfair Display', serif; margin: 0;">
+            Список использованных источников
+        </h1>
+        <p style="margin-top: 0.5rem; opacity: 0.9;">Учебная литература для инженеров атомной отрасли</p>
+    </div>
+
+    <ol class="literature-list">
+        <!-- Начало элемента списка -->
+        <li class="literature-item">
+            <div class="book-meta">
+                <div class="authors">Ганев И. Х.</div>
+                <div class="title">Физика и расчет реактора</div>
+                <div class="details">Под общ. ред. Н. А. Доллежаля. Учеб. пособие для энергомашиностроит. спец. втузов</div>
+            </div>
+        </li>
+        <!-- Конец элемента списка -->
+
+        <div class="decorative-line"></div>
+
+        <li class="literature-item">
+            <div class="book-meta">
+                <div class="authors">Рассохин Н. Г.</div>
+                <div class="title">Парогенераторные установки атомных электростанций</div>
+                <div class="details">Учебник для вузов</div>
+            </div>
+        </li>
+
+        <div class="decorative-line"></div>
+
+        <li class="literature-item">
+            <div class="book-meta">
+                <div class="authors">П. Л. Кириллов, Г. П. Богословская</div>
+                <div class="title">Тепло-массообмен в ядерных энергетических установках</div>
+            </div>
+        </li>
+
+        <div class="decorative-line"></div>
+
+        <li class="literature-item">
+            <div class="book-meta">
+                <div class="authors">В. Д. Шмелев, Ю. Г. Драгунов, В. П. Денисов, И. Н. Васильченко</div>
+                <div class="title">Активные зоны ВВЭР для атомных электростанций</div>
+            </div>
+        </li>
+
+        <div class="decorative-line"></div>
+
+        <li class="literature-item">
+            <div class="book-meta">
+                <div class="authors">Под ред. К. В. Фролова</div>
+                <div class="title">Машиностроение. Энциклопедия. Машиностроение ядерной техники. Том IV-25 в 2 книгах</div>
+            </div>
+        </li>
+
+        <div class="decorative-line"></div>
+
+        <li class="literature-item">
+            <div class="book-meta">
+                <div class="authors">В. В. Перевезенцев</div>
+                <div class="title">Основы инженерных методов расчетов защиты от ионизирующих излучений ядерных энергетических установок</div>
+            </div>
+        </li>
+    </ol>
+</div>
 {% endblock %}
