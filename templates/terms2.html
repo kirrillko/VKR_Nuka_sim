@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Глоссарий симулятора</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Alpine.js CDN -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        [x-cloak] { display: none !important; }
+        .term-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .highlight {
+            background-color: #fef9c3;
+            transition: background-color 0.3s;
+        }
+        .prose img {
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+        .prose img:hover {
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body class="bg-gray-50" x-data="glossary()" x-cloak>
+    <div class="container mx-auto px-4 py-8">
+        <!-- Оглавление -->
+        <div class="sticky top-0 bg-white/90 backdrop-blur-sm z-10 py-4 mb-8 border-b">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Глоссарий | Терминология симулятора</h1>
+            <div class="flex flex-wrap gap-3" x-init="generateTOC()">
+                <template x-for="(section, index) in sections" :key="index">
+                    <a :href="`#section-${index}`"
+                       @click.prevent="scrollToSection(index)"
+                       class="px-4 py-2 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors"
+                       :class="{ 'bg-blue-100': activeSection === index }">
+                       <span x-text="section.title"></span>
+                    </a>
+                </template>
+            </div>
+        </div>
+
+        <!-- Контент -->
+        <div class="prose lg:prose-xl max-w-none">
+            <!-- Твэл -->
+            <div id="section-0" class="term-card mb-8 p-6 rounded-xl bg-white shadow-sm hover:shadow-md transition-all">
+                <div class="flex items-center justify-between cursor-pointer" @click="toggleSection(0)">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">твэл</h2>
+                    <span class="text-gray-400 text-xl">−</span>
+                </div>
+                <div class="space-y-6">
+                    <p><strong>твэл</strong> - тепловыделяющий элемент. Элементарная конструкция, таких в большом реакторе более 10 тысяч штук. Содержит в себе ядерное топливо, которое разогревается.</p>
+                    <img src="https://image1.slideserve.com/3184589/slide4-l.jpg" alt="твэл">
+
+                    <p><strong>Обогащение</strong> - доля изотопа U-235 среди остальных изотопов урана.</p>
+
+                    <p><strong>Полость для продуктов деления</strong> - полость, в которой копятся газообразные продукты деления, образовавшиеся в ходе распада ядер урана.</p>
+                    <img src="https://image1.slideserve.com/3184589/slide6-l.jpg" alt="полость в таблетке">
+                </div>
+            </div>
+
+            <!-- ТВС -->
+            <div id="section-1" class="term-card mb-8 p-6 rounded-xl bg-white shadow-sm hover:shadow-md transition-all">
+                <div class="flex items-center justify-between cursor-pointer" @click="toggleSection(1)">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">ТВС</h2>
+                    <span class="text-gray-400 text-xl">+</span>
+                </div>
+                <div class="space-y-6" x-show="sections[1].open" x-collapse>
+                    <p><strong>ТВС</strong> - тепловыделяющая сборка. Объединяет в себе около сотни твэлов. Таких сборок в большом реакторе более 100. Твэлы не ставят в реактор по отдельности, только в составе ТВС.</p>
+                    <img src="https://studfile.net/html/611/144/html_IsQFaPVDWB.KgZ9/img-QoDo_2.jpg" alt="твс">
+
+                    <p><strong>Тип решётки ТВС</strong> - какую фигуры образуют соседние твс. В отечественных реакторах обычно треугольная решётка из шестигранных ТВС, а в американских - квадратная решётка.</p>
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Сравнение_активных_зон_реакторов.svg/1200px-Сравнение_активных_зон_реакторов.svg.png" alt="решётка твс">
+
+                    <!-- Остальной контент для ТВС -->
+                    <p><strong>Теплоноситель</strong> - вещество, которое циркулирует по трубопроводам через активную зону, оно переносит тепло от твэлов и ТВС подобно воде в трубах отопления.</p>
+
+                    <p><strong>Активная зона</strong> - область внутри реактора, в которой находится ядерное топливо.</p>
+
+                    <p><strong>Дистанционирующие решётки</strong> - устройства, необходимые для поддержания расстояния между твэлами. Без решёток твэлы смогут болтаться под воздействием теплоносителя, сталкиваться и тереться, из-за чего в местах касания постепенно будет развиваться разрушение.</p>
+                    <img src="/static/interface/tvs_dr.png" alt='дистанционирующие решётки'>
+
+                    <p><strong>Выгорающий поглотитель</strong> - вещество, поглощающее нейтроны. Часто это атомы бора или гадолиния. Нужно, чтобы скомпенсировать слишком большое количество топлива на старте топливной кампании.</p>
+
+                    <p><strong>Топливная кампания</strong> - срок экслпуатации одной ТВС, обычно это несколько лет в больших энергетических реакторах.</p>
+                </div>
+            </div>
+
+            <!-- Остальные разделы по аналогии -->
+
+            <!-- Реактор -->
+            <div id="section-2" class="term-card mb-8 p-6 rounded-xl bg-white shadow-sm hover:shadow-md transition-all">
+                <div class="flex items-center justify-between cursor-pointer" @click="toggleSection(2)">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Реактор</h2>
+                    <span class="text-gray-400 text-xl">+</span>
+                </div>
+                <div class="space-y-6" x-show="sections[2].open" x-collapse>
+                    <p><strong>Компоновка</strong> - способ связи оборудования, входящего в состав реакторной установки.</p>
+
+                    <p><strong>Петлевая компоновка</strong> - Для неё характерна значительная пространственная распределённость и большой объём первого контура, наличие трубопроводов большого диаметра, соединяющих основное оборудование: парогенераторы, насосы, теплообменники, компенсаторы объёма и др.. Достоинство — доступность оборудования для профилактического контроля и ремонтных работ.</p>
+                    <img src="https://cf.ppt-online.org/files/slide/m/MaJQoGUTwfqYzW2hPVbdnFNHrt5e0cLR9xAyg8/slide-3.jpg" alt="петлевая компоновка">
+
+                    <p><strong>Блочная компоновка</strong> - оборудование I контура соединено без трубопроводов (через силовые патрубки). Отличается компактностью, часто используется в судовых установках.</p>
+                    <img src="https://www.atomic-energy.ru/files/images/2012/07/vber-300.jpg" alt="блочная компоновка">
+
+                    <p><strong>Интегральная компоновка</strong> - оборудование I контура располагается внутри корпуса реактора. На такую компоновку требуется большое количество конструкционных материалов (стали).</p>
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/LMFBR_schematics2-rus.svg/800px-LMFBR_schematics2-rus.svg.png" alt="интегральная компоновка">
+
+                    <p><strong>Канальная компоновка</strong> - каждая ТВС располагается в своём отдельном канале (трубопроводе). В таких реакторах зачастую можно заменить ТВС по отдельности прямо во время эксплуатации.</p>
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/RBMK_en.svg/1599px-RBMK_en.svg.png" alt="канальная компоновка">
+
+                    <p><strong>Петля</strong> - одна ветка трубопроводов I контура, выходящая из реактора и входящая тоже в реактор. По пути трубопровода обычно располагаются парогенератор и главный циркуляционный насос.</p>
+                    <img src="https://cont.ws/uploads/pic/2018/9/htmlconvd-zPX9gv96x1.jpg" alt="петля ВВЭР">
+
+                    <p><strong>Антидебризный фильтр</strong> - устройство, расположенное на входе теплоносителя в ТВС. Оно останавливает посторонние предметы, которые мог захватить с собой теплоноситель, если они оказались внутри трубопровода I контура.</p>
+                    <img src="/static/interface/tvs_adf.png" alt='антидебризный фильтр'>
+                </div>
+            </div>
+
+            <!-- Парогенератор -->
+            <div id="section-3" class="term-card mb-8 p-6 rounded-xl bg-white shadow-sm hover:shadow-md transition-all">
+                <div class="flex items-center justify-between cursor-pointer" @click="toggleSection(3)">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Парогенератор</h2>
+                    <span class="text-gray-400 text-xl">+</span>
+                </div>
+                <div class="space-y-6" x-show="sections[3].open" x-collapse>
+
+                    <p><strong>Парогенератор</strong> - устройство для переноса тепла из I контура во II, в нём кипит вода II контура, и производится пар.</p>
+                    <img src="https://www.atomic-energy.ru/files/images/2011/11/reactor_mir1200-7.JPG" alt="парогенератор">
+
+                    <p><strong>U-образные трубы</strong> - поверхность теплообмена в виде труб с одним изгибом на 180°.</p>
+                    <img src="https://avatars.mds.yandex.net/i?id=3f4cec7d94f581407f94df56d8e32a62_l-5324799-images-thumbs&n=13" alt="U-трубы">
+
+                    <p><strong>Змеевики</strong> - поверхность теплообмена в виде закрученных по спирали трубочек.</p>
+                    <img src="https://lavkavinokura.ru/wp-content/uploads/2022/01/Dist-golova.png" alt="змеевики">
+                </div>
+            </div>
+
+            <!-- Теплотехника -->
+            <div id="section-4" class="term-card mb-8 p-6 rounded-xl bg-white shadow-sm hover:shadow-md transition-all">
+                <div class="flex items-center justify-between cursor-pointer" @click="toggleSection(4)">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Теплотехника</h2>
+                    <span class="text-gray-400 text-xl">+</span>
+                </div>
+                <div class="space-y-6" x-show="sections[4].open" x-collapse>
+
+                    <p><strong>ГЦН</strong> - главный циркуляционный насос. Этот насос прокачивает теплоноситель (обычно воду) в I контуре.</p>
+                    <img src="https://ckbm.ru/upload/old_resources/assets/images/resources/3330/1753.jpg" alt="ГЦН">
+
+                    <p><strong>Питательный насос</strong> - насос, который прокачивает воду во II контуре.</p>
+                    <img src="https://ckbm.ru/upload/old_resources/assets/images/resources/3332/mnogostup1.jpg" alt="питательный насос">
+
+                    <p><strong>Электромагнитный насос</strong> - насос для прокачки жидкометаллического теплоносителя. Создаёт магнитное поле, проталкивающее теплоноситель.</p>
+
+                    <p><strong>Турбина</strong> - устройство, на котором совершает работу пар для того, чтобы преобразовать тепловую энергию в электрическую.</p>
+                    <img src="https://strana-rosatom.ru/wp-content/uploads/2022/02/edf.jpg" alt="турбина">
+
+                    <p><strong>Конденсатор</strong> - теплообменное устройство, в котором пар охлаждается и превращается в воду.</p>
+                    <img src="https://metallicheckiy-portal.ru/imguser/85/85_4821_818056_b.jpg" alt="конденсатор">
+                </div>
+            </div>
+
+            <!-- Системы безопасности -->
+            <div id="section-5" class="term-card mb-8 p-6 rounded-xl bg-white shadow-sm hover:shadow-md transition-all">
+                <div class="flex items-center justify-between cursor-pointer" @click="toggleSection(5)">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Системы безопасности</h2>
+                    <span class="text-gray-400 text-xl">+</span>
+                </div>
+                <div class="space-y-6" x-show="sections[5].open" x-collapse>
+
+                    <p><strong>Гермоолобочка</strong> - последний барьер безопасности водо-водяных АЭС.</p>
+                    <img src="https://avatars.dzeninfra.ru/get-zen_doc/1533996/pub_5e3a75fe1eb29b1b24df3597_5e3a761031996b5ab90f60b6/scale_1200" alt="гермооболочка">
+
+                    <p><strong>Стержни СУЗ и АЗ</strong> - стержни, внутри которых вещество-поглотитель нейтронов. Эти конструкции могут двигаться вверх-вниз благодаря автоматике, они регулируют мощность реактора.</p>
+                    <img src="https://avatars.mds.yandex.net/i?id=a6902b5cbd37a9d587486a98b9c6afb7_l-5332183-images-thumbs&n=13" alt="СУЗ">
+
+                    <p><strong>пэл</strong> - поглощающий элемент. Элементарная конструкция, из которых состоит орган СУЗ и АЗ наподобие твэла, но внутри вещество, поглощающее нейтроны (часто это соединения Бора).</p>
+
+                    <p><strong>Гидроёмкости</strong> - вертикальные цистерны с водой, запасы которой нужны на случай аварии. Эта вода пойдёт на охлаждение активной зоны реактора в случае, если существенно нарушена циркуляция теплоносителя I контура. Даёт некоторое время на то, чтобы восстановить I контур (72 часа).</p>
+                    <img src="https://studfile.net/html/2706/1117/html_TPkCHcLZPl.6DSA/htmlconvd-wISLEk65x1.jpg" alt="ГЕ">
+
+                    <p><strong>Ловушка расплава</strong> - специальный сосуд, внутрь которого должен затечь расплав активной зоны в случае тяжёлой запроектной аварии (когда вся активная зона расплавилась и проплавила отверстие в дне корпуса реактора).</p>
+                    <img src="https://avatars.dzeninfra.ru/get-zen_doc/3986710/pub_5f9842215142496dd17b29a1_5f98423859810d5513f19ef3/scale_1200" alt="ловушка">
+
+                    <p><strong>Спринклерная система</strong> - система, распыляющая воду или какой-то раствор, который помогает сконденсировать испарённый теплоноситель и выделившийся в результате пароциркониевой реакции водород, который взрывоопасен.</p>
+                    <img src="https://ozlib.com/htm/img/17/20927/216.png" alt="спринклерная система">
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('glossary', () => ({
+                sections: [],
+                activeSection: 0,
+
+                init() {
+                    this.sections = Array.from(document.querySelectorAll('.term-card')).map((card, index) => ({
+                        title: card.querySelector('h2').textContent,
+                        open: index === 0
+                    }));
+                },
+
+                toggleSection(index) {
+                    this.sections[index].open = !this.sections[index].open;
+                },
+
+                scrollToSection(index) {
+                    const element = document.getElementById(`section-${index}`);
+                    element.scrollIntoView({ behavior: 'smooth' });
+                    this.activeSection = index;
+                    this.sections[index].open = true;
+                }
+            }));
+        });
+    </script>
+</body>
+</html>

@@ -1,7 +1,141 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Глоссарий: используемая в симуляторе терминология</h1>
+
+<div x-data="glossary()" class="container mx-auto px-4 py-8" x-cloak>
+    <style>
+        .term-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .highlight {
+            @apply bg-yellow-100 transition-colors duration-300;
+        }
+        [x-cloak] { display: none !important; }
+        .prose img {
+            @apply rounded-lg shadow-lg transition-transform duration-300 hover:scale-105;
+        }
+    </style>
+
+    <!-- Оглавление -->
+    <div class="sticky top-0 bg-white/90 backdrop-blur-sm z-10 py-4 mb-8 border-b">
+        <h1 class="text-4xl font-bold text-gray-800 mb-4">Глоссарий | Используемая в симуляторе терминология</h1>
+        <div class="flex flex-wrap gap-3">
+            <template x-for="(section, index) in sections" :key="index">
+                <a :href="`#section-${index}`"
+                   @click="scrollToSection(index)"
+                   class="px-4 py-2 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors"
+                   :class="{ 'bg-blue-100': activeSection === index }">
+                   <span x-text="section.title"> Привет мир</span>
+                </a>
+            </template>
+        </div>
+    </div>
+
+    <!-- Содержание -->
+    <div class="prose lg:prose-xl max-w-none">
+        <template x-for="(section, index) in sections" :key="index">
+            <div :id="`section-${index}`" class="term-card mb-8 p-6 rounded-xl bg-white shadow-sm hover:shadow-md transition-all">
+                <div class="flex items-center justify-between cursor-pointer" @click="toggleSection(index)">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4"
+                        x-text="section.title"
+                        @mouseenter="highlightTerm(section.title)"
+                        @mouseleave="clearHighlight"> тест заголовка h2</h2>
+                    <span class="text-gray-400 text-xl" x-text="sections[index].open ? '−' : '+'"></span>
+                </div>
+
+                <div x-show="section.open" x-collapse class="space-y-6">
+                    <template x-for="content in section.contents">
+                        <div x-html="content"
+                             @mouseenter="highlightTerm(content)"
+                             @mouseleave="clearHighlight"
+                             class="border-l-4 border-blue-100 pl-4"></div>
+                    </template>
+                </div>
+            </div>
+        </template>
+    </div>
+</div>
+
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('glossary', () => ({
+        sections: [],
+        activeSection: 0,
+
+        init() {
+            this.parseContent();
+            this.setupObservers();
+        },
+
+        parseContent() {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(`{{ self._TemplateReference__context.blocks.content|safe }}`, 'text/html');
+
+            let currentSection = null;
+            doc.body.childNodes.forEach(node => {
+                if (node.tagName === 'H2') {
+                    if (currentSection) this.sections.push(currentSection);
+                    currentSection = {
+                        title: node.textContent,
+                        contents: [],
+                        open: true
+                    };
+                } else if (currentSection) {
+                    currentSection.contents.push(node.outerHTML);
+                }
+            });
+            if (currentSection) this.sections.push(currentSection);
+        },
+
+        toggleSection(index) {
+            this.sections[index].open = !this.sections[index].open;
+        },
+
+        scrollToSection(index) {
+            const element = document.getElementById(`section-${index}`);
+            element.scrollIntoView({ behavior: 'smooth' });
+            this.activeSection = index;
+        },
+
+        setupObservers() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const index = parseInt(entry.target.id.split('-')[1]);
+                        this.activeSection = index;
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            this.sections.forEach((_, index) => {
+                observer.observe(document.getElementById(`section-${index}`));
+            });
+        },
+
+        highlightTerm(text) {
+            document.querySelectorAll('h2, p').forEach(element => {
+                if (element.textContent.includes(text.trim())) {
+                    element.classList.add('highlight');
+                }
+            });
+        },
+
+        clearHighlight() {
+            document.querySelectorAll('.highlight').forEach(el =>
+                el.classList.remove('highlight'));
+        }
+    }));
+});
+</script>
+
+<!-- Подключаем Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Подключаем Alpine.js -->
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<body class="bg-gray-50">
+
+<h1>Глоссарий | Используемая в симуляторе терминология</h1>
 <h2>твэл</h2>
 
 твэл - тепловыделяющий элемент. Элементарная конструкция, таких в большом реакторе более 10 тысяч штук. Содержит в себе ядерное топливо, которое разогревается.
@@ -26,6 +160,7 @@
 Активная зона - область внутри реактора, в которой находится ядерное топливо.
 
 Дистанционирующие решётки - устройства, необходимые для поддержания расстояния между твэлами. Без решёток твэлы смогут болтаться под воздействием теплоносителя, сталкиваться и тереться, из-за чего в местах касания постепенно будет развиваться разрушение.
+<img src="/static/interface/tvs_dr.png" alt='дистанционирующие решётки'>
 
 Выгорающий поглотитель - вещество, поглощающее нейтроны. Часто это атомы бора или гадолиния. Нужно, чтобы скомпенсировать слишком большое количество топлива на старте топливной кампании.
 
@@ -47,8 +182,57 @@
 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/RBMK_en.svg/1599px-RBMK_en.svg.png" alt="канальная компоновка">
 
 Петля - одна ветка трубопроводов I контура, выходящая из реактора и входящая тоже в реактор. По пути трубопровода обычно располагаются парогенератор и главный циркуляционный насос.
+<img src="https://cont.ws/uploads/pic/2018/9/htmlconvd-zPX9gv96x1.jpg" alt="петля ВВЭР">
 
 Антидебризный фильтр - устройство, расположенное на входе теплоносителя в ТВС. Оно останавливает посторонние предметы, которые мог захватить с собой теплоноситель, если они оказались внутри трубопровода I контура.
+<img src="/static/interface/tvs_adf.png" alt='антидебризный фильтр'>
+
+<h2>Парогенератор</h2>
+
+Парогенератор - устройство для переноса тепла из I контура во II, в нём кипит вода II контура, и производится пар.
+<img src="https://www.atomic-energy.ru/files/images/2011/11/reactor_mir1200-7.JPG" alt="парогенератор">
+
+U-образные трубы - поверхность теблообмена в виде труб с одним изгибом на 180 градусов.
+<img src="https://avatars.mds.yandex.net/i?id=3f4cec7d94f581407f94df56d8e32a62_l-5324799-images-thumbs&n=13" alt="U-трубы">
+
+Змеевики - поверхность теплообмена в виде закрученных по спирали трубочек.
+<img src="https://lavkavinokura.ru/wp-content/uploads/2022/01/Dist-golova.png" alt="змеевики">
+
+<h2>Теплотехника</h2>
+
+ГЦН - главный циркуляционный насос. Этот насос прокачивает теплоноситель (обычно воду) в I контуре.
+<img src="https://ckbm.ru/upload/old_resources/assets/images/resources/3330/1753.jpg" alt="ГЦН">
+
+Питательный насос - насос, который прокачивает воду во II контуре.
+<img src="https://ckbm.ru/upload/old_resources/assets/images/resources/3332/mnogostup1.jpg" alt="питательный насос">
+
+Электромагнитный насос - насос для прокачки жидкометаллического теплоносителя. Создаёт магнитное поле, проталкивающее теплоноситель.
+
+Турбина - устройство, на котором совершает работу пар для того, чтобы преобразовать тепловую энергию в электрическую.
+<img src="https://strana-rosatom.ru/wp-content/uploads/2022/02/edf.jpg" alt="турбина">
+
+Конденсатор - теплообменное устройство, в котором пар охлаждается и превращается в воду.
+<img src="https://metallicheckiy-portal.ru/imguser/85/85_4821_818056_b.jpg" alt="конденсатор">
+
+<h2>Системы безопасности</h2>
+
+Гермоолобочка - последний барьер безопасности водо-водяных АЭС.
+<img src="https://avatars.dzeninfra.ru/get-zen_doc/1533996/pub_5e3a75fe1eb29b1b24df3597_5e3a761031996b5ab90f60b6/scale_1200" alt="гермооболочка">
+
+Стержни СУЗ и АЗ - стержни, внутри которых вещество-поглотитель нейтронов. Эти конструкции могут двигаться вверх-вниз благодаря автоматике, они регулируют мощность реактора.
+<img src="https://avatars.mds.yandex.net/i?id=a6902b5cbd37a9d587486a98b9c6afb7_l-5332183-images-thumbs&n=13" alt="СУЗ">
+
+пэл - поглощающий элемент. Элементарная конструкция, из которых состоит орган СУЗ и АЗ наподобие твэла, но внутри вещество, поглощающее нейтроны (часто это соединения Бора).
+
+Гидроёмкости - вертикальные цистерны с водой, запасы которой нужны на случай аварии. Эта вода пойдёт на охлаждение активной зоны реактора в случае, если существенно нарушена циркуляция теплоносителя I контура. Даёт некоторое время на то, чтобы восстановить I контур (72 часа).
+<img src="https://studfile.net/html/2706/1117/html_TPkCHcLZPl.6DSA/htmlconvd-wISLEk65x1.jpg" alt="ГЕ">
+
+Ловушка расплава - специальный сосуд, внутрь которого должен затечь расплав активной зоны в случае тяжёлой запроектной аварии (когда вся активная зона расплавилась и проплавила отверстие в дне корпуса реактора).
+<img src="https://autogear.ru/misc/i/gallery/31591/2707768.jpg" alt="ловушка">
+
+Спринклерная система - система, распыляющая воду или какой-то раствор, который помогает сконденсировать испарённый теплоноситель и выделившийся в результате пароциркониевой реакции водород, который взрывоопасен.
+<img src="https://ozlib.com/htm/img/17/20927/216.png" alt="спринклерная система">
+</body>
 
 
 

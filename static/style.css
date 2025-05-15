@@ -87,3 +87,5 @@ footer {
     border-radius: 4px; /* Скругление углов заголовка */
     margin: 0 0 10px 0; /* Убираем верхний отступ и добавляем нижний */
 }
+
+[x-cloak] { display: none !important; }

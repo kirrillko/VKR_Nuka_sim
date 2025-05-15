@@ -41,7 +41,7 @@ def feedback():
 
 @app.route("/terms")
 def terms():
-    return render_template("head_terms.html")
+    return render_template("terms2.html")
 
 @app.route("/sources")
 def sources():
