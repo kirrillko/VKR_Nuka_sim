@@ -2,48 +2,22 @@
 
 {% block content %}
     <div class="container">
-        <div class="block" style="background-image: url('/static/Реактор.jpg');">
-            <h2>Современный путь</h2>
+        <div class="block" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('/static/Реактор.jpg');">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold mb-6 text-white drop-shadow-lg">Конструктор ядерных реакторов</h1>
+                <p class="text-xl text-white/90 mb-8 max-w-2xl mx-auto leading-relaxed">
+                    Интерактивный симулятор для проектирования атомных энергетических установок.
+                    Создайте свою уникальную конфигурацию реактора и протестируйте её в различных условиях.
+                </p>
+            </div>
+
             <ul>
-                <li><a href="#">Обучение</a></li>
-                <li><a href="/simulator">Пройти</a></li>
+                <li>
+                    <a href="/simulator" class="hover:bg-white/20 transition-all">
+                        🚀 Начать проектирование
+                    </a>
+                </li>
             </ul>
         </div>
-
-<!--        <div class="block" style="background-image: url('/static/ТВС.jpg');">-->
-<!--            <h2>Cоветский путь</h2>-->
-<!--            <ul>-->
-<!--                <li><a href="#">Пройти</a></li>-->
-<!--            </ul>-->
-<!--        </div>-->
-
-<!--        <div class="block" style="background-image: url('/static/Парогенератор.jpg');">-->
-<!--            <h2>Канадский путь</h2>-->
-<!--            <ul>-->
-<!--                <li><a href="#">Пройти</a></li>-->
-<!--            </ul>-->
-<!--        </div>-->
-
-<!--        <div class="block" style="background-image: url('/static/Радиоактивность.jpg');">-->
-<!--            <h2>Восточный путь</h2>-->
-<!--            <ul>-->
-<!--                <li><a href="#">Пройти</a></li>-->
-
-<!--            </ul>-->
-<!--        </div>-->
-
-<!--        <div class="block" style="background-image: url('/static/Пульт АЭС.jpeg');">-->
-<!--            <h2>Восточный путь</h2>-->
-<!--            <ul>-->
-<!--                <li><a href="#">Пройти</a></li>-->
-<!--            </ul>-->
-<!--        </div>-->
-
-<!--        <div class="block" style="background-image: url('/static/Ледокол Ленин.jfif');">-->
-<!--            <h2>Морской путь</h2>-->
-<!--            <ul>-->
-<!--                <li><a href="#">Пройти</a></li>-->
-<!--            </ul>-->
-<!--        </div>-->
     </div>
 {% endblock %}

@@ -37,55 +37,57 @@ footer {
 }
 
 .container {
-    display: flex;
-    flex-wrap: wrap; /* Позволяет оборачивать элементы */
-    justify-content: space-between; /* Распределяет пространство между блоками */
+    flex-grow: 1;
+    padding: 20px;
 }
 
 .block {
-    background-size: cover; /* Заполнение блока изображением */
-    background-position: center; /* Центрирование изображения */
-    color: white; /* Цвет текста */
-    padding: 20px; /* Отступы внутри блока */
-    margin: 10px; /* Отступы между блоками */
-    border-radius: 8px; /* Скругление углов */
-    height: 200px; /* Высота блока */
-    width: calc(30.333% - 20px); /* Ширина блока, чтобы поместились 3 в строке */
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 40px;
+    border-radius: 12px;
+    min-height: calc(100vh - 200px); /* Учитываем высоту шапки и футера */
+    width: 90%;
+    max-width: 1200px;
+    margin: 20px auto;
     display: flex;
     flex-direction: column;
-    justify-content: center; /* Центрирование содержимого по вертикали */
-    align-items: center; /* Центрирование содержимого по горизонтали */
-    text-align: center; /* Выравнивание текста по центру */
+    justify-content: space-between; /* Распределяем пространство */
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
 .block ul {
-    padding: 0; /* Убираем отступы у списка */
-    list-style: none; /* Убираем маркеры у списка */
+    padding: 0;
+    list-style: none;
+    margin-top: auto; /* Прижимаем список к низу */
+    width: 100%;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .block ul li {
-    margin: 10px 0; /* Отступы между ссылками */
+    margin: 20px 0;
 }
 
 .block ul li a {
-    display: block; /* Чтобы ссылка занимала всю ширину блока */
-    background-color: gray; /* Цвет фона ссылки */
-    color: white; /* Цвет текста ссылки */
-    padding: 10px; /* Отступы внутри ссылки */
-    text-decoration: none; /* Убираем подчеркивание */
-    border-radius: 4px; /* Скругление углов ссылок */
-    transition: background-color 0.3s; /* Плавный переход для эффекта наведения */
+    display: block;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(5px);
+    color: white;
+    padding: 15px 30px;
+    text-decoration: none;
+    border-radius: 50px;
+    transition: all 0.3s;
+    border: 2px solid rgba(255,255,255,0.3);
+    font-size: 1.2em;
+    text-align: center;
 }
 
 .block ul li a:hover {
-    background-color: darkgray; /* Цвет фона при наведении */
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
-
-.block h2 {
-    background-color: gray; /* Цвет фона заголовка */
-    padding: 10px; /* Отступы внутри заголовка */
-    border-radius: 4px; /* Скругление углов заголовка */
-    margin: 0 0 10px 0; /* Убираем верхний отступ и добавляем нижний */
-}
-
-[x-cloak] { display: none !important; }
