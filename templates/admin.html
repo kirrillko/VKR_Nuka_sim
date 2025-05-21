@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div x-data="adminPanel()" class="container mx-auto px-4 py-8" x-cloak>
+    <style>
+        .table-row:hover {
+            background-color: #f8fafc;
+            transform: translateY(-2px);
+        }
+        .sortable:hover {
+            cursor: pointer;
+            background-color: #f1f5f9;
+        }
+    </style>
+
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">Панель администратора</h1>
+<!--        <div class="relative">-->
+<!--            <input type="text" -->
+<!--                   x-model="searchTerm"-->
+<!--                   placeholder="Поиск по всем полям..."-->
+<!--                   class="w-full p-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">-->
+<!--        </div>-->
+    </div>
+
+    <div class="overflow-x-auto rounded-lg shadow-lg">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th @click="sortBy('timestamp')" class="sortable px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Дата
+                        <span x-text="getSortIcon('timestamp')" class="ml-2"></span>
+                    </th>
+                    <th @click="sortBy('who')" class="sortable px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Категория
+                        <span x-text="getSortIcon('who')" class="ml-2"></span>
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Оценки</th>
+                    <th @click="sortBy('reactors')" class="sortable px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Реакторы
+                        <span x-text="getSortIcon('reactors')" class="ml-2"></span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                <template x-for="item in filteredItems" :key="item.id">
+                    <tr class="table-row transition-all">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="new Date(item.timestamp).toLocaleString()"></td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 rounded-full text-xs font-medium" 
+                                  :class="getCategoryColor(item.who)"
+                                  x-text="getCategoryLabel(item.who)"></span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex items-center">
+                                    <span class="text-sm">Симулятор:</span>
+                                    <span class="ml-2 text-blue-600 font-medium" x-text="item.simulator"></span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-sm">Реком.:</span>
+                                    <span class="ml-2 text-green-600 font-medium" x-text="item.recommendation"></span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-sm">Удобство:</span>
+                                    <span class="ml-2 text-purple-600 font-medium" x-text="item.usability"></span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex flex-wrap gap-2">
+                                <template x-for="reactor in item.reactors">
+                                    <span class="px-2 py-1 bg-gray-100 rounded-full text-xs" x-text="reactor"></span>
+                                </template>
+                            </div>
+                        </td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('adminPanel', () => ({
+        init() {
+            this.items = JSON.parse('{{ feedbacks|tojson|safe }}');
+        },
+        
+        items: [],
+        sortKey: 'timestamp',
+        sortDirection: 'desc',
+        searchTerm: '',
+
+        get filteredItems() {
+            return this.items
+                .filter(item => {
+                    const search = this.searchTerm.toLowerCase();
+                    return Object.values(item).some(value => 
+                        String(value).toLowerCase().includes(search)
+                    );
+                })
+                .sort((a, b) => {
+                    const modifier = this.sortDirection === 'asc' ? 1 : -1;
+                    return a[this.sortKey] > b[this.sortKey] ? modifier : -modifier;
+                });
+        },
+
+        sortBy(key) {
+            if (this.sortKey === key) {
+                this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.sortKey = key;
+                this.sortDirection = 'asc';
+            }
+        },
+
+        getSortIcon(key) {
+            if (this.sortKey !== key) return '↕';
+            return this.sortDirection === 'asc' ? '↑' : '↓';
+        },
+
+        getCategoryLabel(who) {
+            const labels = {
+                'atomic-engineer': 'Инженер',
+                'school-physics': 'Школьник (физика)',
+                'school-no-physics': 'Школьник (без физики)',
+                'other': 'Другое'
+            };
+            return labels[who] || who;
+        },
+
+        getCategoryColor(who) {
+            const colors = {
+                'atomic-engineer': 'bg-blue-100 text-blue-800',
+                'school-physics': 'bg-green-100 text-green-800',
+                'school-no-physics': 'bg-yellow-100 text-yellow-800',
+                'other': 'bg-gray-100 text-gray-800'
+            };
+            return colors[who] || 'bg-gray-100 text-gray-800';
+        }
+    }));
+});
+</script>
+{% endblock %}

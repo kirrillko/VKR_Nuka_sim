@@ -25,7 +25,7 @@ class Feedback(db.Model):
             'recommendation': self.recommendation,
             'usability': self.usability,
             'reactors': self.reactors.split(',') if self.reactors else [],
-            'timestamp': self.timestamp.isoformat()
+            'timestamp': self.timestamp.isoformat() if self.timestamp else None
         }
 @app.route("/")
 def read_index():
@@ -79,6 +79,12 @@ def submit():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
+@app.route('/admin')
+def admin_panel():
+    feedbacks = Feedback.query.order_by(Feedback.timestamp.desc()).all()
+    # Преобразуем каждый объект Feedback в словарь
+    feedbacks_list = [feedback.to_dict() for feedback in feedbacks]
+    return render_template('admin.html', feedbacks=feedbacks_list)
 
 if __name__ == "__main__":
     with app.app_context():
